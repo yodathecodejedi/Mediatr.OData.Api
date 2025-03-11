@@ -1,0 +1,38 @@
+trigger:
+- main
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  projectName: 'Mediatr.Dapper'
+  buildConfiguration: 'Release'
+  major: '1'  
+  minor: '0'  
+  revision: $[counter(variables['minor'], 1)] # This will get reset every time minor gets bumped.
+  nugetVersion: '$(major).$(minor).$(revision)'
+
+steps:
+
+- task: UseDotNet@2
+  displayName: 'Use .NET sdk'
+
+- task: NuGetAuthenticate@1
+  displayName: 'Authenticate access to Medfiatr feed'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build and Pack $(ProjectName)'
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/$(ProjectName)*.csproj'
+    packDirectory: '$(build.artifactStagingDirectory)'
+    versionEnvVar: 'nugetVersion'
+    versioningScheme: byEnvVar
+
+- task: DotNetCoreCLI@2
+  displayName: 'Deploy $(ProjectName) to internal NuGet Feed'
+  inputs:
+    command: 'push'
+    packagesToPush: '$(build.artifactStagingDirectory)/$(ProjectName)*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: 'Mediatr.Nuget'
