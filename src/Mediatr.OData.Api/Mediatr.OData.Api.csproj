@@ -1,5 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Here we set our Assyembly and NugetPackage Version -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <PackageOutputPath>$(SolutionDir)packages\pre-release</PackageOutputPath>
+    <VersionPrefix>1.1.0</VersionPrefix>
+    <PackageVersionSufix>beta</PackageVersionSufix>
+  </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PackageOutputPath>$(SolutionDir)packages\release</PackageOutputPath>
+    <VersionPrefix>1.1.0</VersionPrefix>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <InformationalVersion>$(VersionPrefix)$(VersionSuffix)</InformationalVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <InformationalVersion>$(VersionPrefix)$(VersionSuffix)</InformationalVersion>
+  </PropertyGroup>
+  
+  <!-- Here we set the output path for the Nuget Package -->
+  <Target Name="SetNugetOutput" BeforeTargets="Pack">
+    <PropertyGroup>
+      <PackageOutputPath Condition="'$(PackageOutputPath)' == ''">$(OutputPath)</PackageOutputPath>
+    </PropertyGroup>
+  </Target>
+  
+  <!-- Here we set the Nuget Package Id and other metadata -->
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -7,7 +37,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Mediatr.OData.Api</PackageId>
-    <Version>1.0.2</Version>
     <Authors>TheCodeJedi</Authors>
     <Description>Mediatr.OData.Api is a lightweight library for creating APIs using, OData, and .NET Minimal APIs. Simplify modern API development with an intuitive and flexible approach.</Description>
     <PackageTags>API;MinimalAPI;OData;DotNet</PackageTags>
