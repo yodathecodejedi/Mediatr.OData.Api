@@ -7,12 +7,6 @@
 !packages/
 !packages/**
 
-# Ensure subdirectories are explicitly included
-!packages/release/
-!packages/release/**
-!packages/pre-release/
-!packages/pre-release/**
-
 # User-specific files
 *.rsuser
 *.suo
@@ -370,3 +364,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ensure subdirectories are explicitly included
+!packages/release/
+!packages/release/**
+!packages/pre-release/
+!packages/pre-release/**
