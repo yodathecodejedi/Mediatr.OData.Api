@@ -33,9 +33,9 @@ public class ODataQueryOptionsWithPageSize<TDomainObject>(
             //We need to expand this to handle the exception with more context maybe to give the correct statuscode
             return new Result<dynamic>
             {
+                Data = null,
                 IsSuccess = false,
                 Message = ex.Message,
-                Exception = ex,
                 HttpStatusCode = HttpStatusCode.NotAcceptable
             };
         }

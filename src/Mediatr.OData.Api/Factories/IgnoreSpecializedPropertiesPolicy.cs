@@ -1,4 +1,6 @@
 ﻿using Mediatr.OData.Api.Attributes;
+using Mediatr.OData.Api.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -27,15 +29,38 @@ public class IgnoreSpecializedPropertiesPolicy : JsonConverterFactory
             var properties = type.GetProperties()
                 .Where(prop => prop.GetCustomAttribute<PropertyInternalAttribute>() == null);
 
-            writer.WriteStartObject();
-            foreach (var property in properties)
+            if (value is ProblemDetails)
             {
-                var propValue = property.GetValue(value);
-                var propName = options.PropertyNamingPolicy?.ConvertName(property.Name) ?? property.Name;
-                writer.WritePropertyName(propName);
-                JsonSerializer.Serialize(writer, propValue, property.PropertyType, options);
+                writer.WriteStartObject();
+                try
+                {
+                    var title = value.GetPropertyValue("Title")?.ToString() ?? default!;
+                    writer.WriteString("title", title.ToString());
+                    var status = value.GetPropertyValue("Status")?.ToString() ?? default!;
+                    writer.WriteString("status", status);
+                    var details = value.GetPropertyValue("Detail")?.ToString() ?? default!;
+                    writer.WriteString("details", details);
+                }
+                catch { }
+                writer.WriteEndObject();
             }
-            writer.WriteEndObject();
+            else
+            {
+                //// Add additional properties or custom fields if needed
+                writer.WriteStartObject();
+                foreach (var property in properties)
+                {
+                    try
+                    {
+                        var propName = options.PropertyNamingPolicy?.ConvertName(property.Name) ?? property.Name;
+                        var propValue = property.GetValue(value);
+                        writer.WritePropertyName(propName);
+                        JsonSerializer.Serialize(writer, propValue, property.PropertyType, options);
+                    }
+                    catch { }
+                }
+                writer.WriteEndObject();
+            }
         }
     }
 }

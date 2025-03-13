@@ -12,6 +12,8 @@ using System.Data;
 
 namespace Mediatr.OData.Api.Example.EndpointHandlers;
 
+
+[EndpointRoute("afdelingen")]
 public class AfdelingHandlers
 {
     public static string Query(bool withKey = false)
@@ -157,8 +159,8 @@ public class AfdelingHandlers
             {
                 //Haal mijn data op, op de manier zoals wij dat fijn vinden
                 var data = await GetAfdelingenFromDB(connection);
+                var result = options.ApplyODataOptions(data);
 
-                //Apply Odata Query Options to the data
                 return options.ApplyODataOptions(data);
             }
             catch (Exception ex)
@@ -166,7 +168,7 @@ public class AfdelingHandlers
                 return new Result<dynamic>
                 {
                     IsSuccess = false,
-                    Exception = ex,
+                    //Exception = ex,
                     Message = ex.Message,
                     CustomResult = @"{ ""test"":""Deze functie is fout gegaan!""}",
                     HttpStatusCode = System.Net.HttpStatusCode.NotAcceptable
