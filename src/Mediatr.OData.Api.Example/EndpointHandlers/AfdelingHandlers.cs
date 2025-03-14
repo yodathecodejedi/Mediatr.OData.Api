@@ -261,6 +261,7 @@ public class AfdelingHandlers
                 var s = domainObjectDelta.ValidateModel(ModelValidationMode.Post);
 
                 Afdeling afdeling = domainObjectDelta.Post();
+
                 domainObjectDelta.TryPost(out afdeling);
 
                 //Do something with the entity
