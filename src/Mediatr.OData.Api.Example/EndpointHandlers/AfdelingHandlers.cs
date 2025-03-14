@@ -6,17 +6,16 @@ using Mediatr.OData.Api.Extensions;
 using Mediatr.OData.Api.Interfaces;
 using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.OData.Deltas;
-using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData;
 using System.Data;
 
 namespace Mediatr.OData.Api.Example.EndpointHandlers;
 
 
-[EndpointRoute("afdelingen")]
+[EndpointGroup("afdelingen")]
 public class AfdelingHandlers
 {
-    public static string Query(bool withKey = false)
+    public static string AfdelingQuery(bool withKey = false)
     {
         string sql = @"
             SELECT
@@ -40,6 +39,31 @@ public class AfdelingHandlers
         return sql;
     }
 
+    public static string MedewerkerQuery()
+    {
+        return @"
+            SELECT
+                m.AfdelingId,                    
+                m.Id,
+                m.Name,
+                m.Description
+            FROM Medewerkers m
+            WHERE m.AfdelingId = @key
+            ";
+    }
+
+    public static string BedrijfQuery()
+    {
+        return @"
+            SELECT
+                b.Id,
+                b.Name,
+                b.Description
+            FROM Bedrijf b
+            WHERE b.Id = (SELECT TOP 1 BedrijfId FROM dbo.Afdeling WHERE Id = @key)
+            ";
+    }
+
     public static async Task<IQueryable<Afdeling>> GetAfdelingenFromDB(IDbConnection connection)
     {
         try
@@ -47,7 +71,7 @@ public class AfdelingHandlers
             connection.Open();
             var afdelingenDictionary = new Dictionary<int, Afdeling>();
             var afdelingen = await connection.QueryAsync<Afdeling, Medewerker, Afdeling>(
-                Query(),
+                AfdelingQuery(),
                 (afdeling, medewerker) =>
                 {
                     if (!afdelingenDictionary.TryGetValue(afdeling.Sleutel, out var currentAfdeling))
@@ -83,7 +107,7 @@ public class AfdelingHandlers
             connection.Open();
             var afdelingenDictionary = new Dictionary<int, Afdeling>();
             var afdelingen = await connection.QueryAsync<Afdeling, Medewerker, Afdeling>(
-                Query(),
+                AfdelingQuery(),
                 (afdeling, medewerker) =>
                 {
                     if (!afdelingenDictionary.TryGetValue(afdeling.Sleutel, out var currentAfdeling))
@@ -112,6 +136,44 @@ public class AfdelingHandlers
         }
     }
 
+    public static async Task<IQueryable<Medewerker>> GetMedewerkersFromDB(IDbConnection connection, int key)
+    {
+        try
+        {
+            connection.Open();
+            var medewerkers = await connection.QueryAsync<Medewerker>(MedewerkerQuery(), new { key });
+            return medewerkers.AsQueryable();
+        }
+        catch
+        {
+            return default!;
+        }
+        finally
+        {
+            if (connection.State == ConnectionState.Open)
+                connection.Close();
+        }
+    }
+
+    public static async Task<Bedrijf> GetBedrijfFromDB(IDbConnection connection, int key)
+    {
+        try
+        {
+            connection.Open();
+            var bedrijf = await connection.QueryFirstOrDefaultAsync<Bedrijf>(BedrijfQuery(), new { key });
+            return bedrijf ?? default!;
+        }
+        catch
+        {
+            return default!;
+        }
+        finally
+        {
+            if (connection.State == ConnectionState.Open)
+                connection.Close();
+        }
+    }
+
     #region Get Afdelingen
     //public class CustomRequest
     //{
@@ -128,7 +190,7 @@ public class AfdelingHandlers
     //        {
     //            //Haal mijn data op, op de manier zoals wij dat fijn vinden
     //            var data = await GetAfdelingenFromDB(connection);
-    //            //Apply Odata Query Options to the data
+    //            //Apply Odata AfdelingQuery Options to the data
     //            return new Result<dynamic>
     //            {
     //                IsSuccess = true,
@@ -150,67 +212,38 @@ public class AfdelingHandlers
     //    }
     //}
 
-    [Endpoint<Afdeling>("afdelingen", EndpointMethod.Get)]
+    [Endpoint<Afdeling>(EndpointMethod.Get)]
     public class GetHandler(IDbConnection connection) : IEndpointGetHandler<Afdeling>
     {
         public async Task<Result<dynamic>> Handle(ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
-            try
-            {
-                //Haal mijn data op, op de manier zoals wij dat fijn vinden
-                var data = await GetAfdelingenFromDB(connection);
-                var result = options.ApplyODataOptions(data);
 
-                return options.ApplyODataOptions(data);
-            }
-            catch (Exception ex)
-            {
-                return new Result<dynamic>
-                {
-                    IsSuccess = false,
-                    //Exception = ex,
-                    Message = ex.Message,
-                    CustomResult = @"{ ""test"":""Deze functie is fout gegaan!""}",
-                    HttpStatusCode = System.Net.HttpStatusCode.NotAcceptable
-                };
+            //Haal mijn data op, op de manier zoals wij dat fijn vinden
+            var data = await GetAfdelingenFromDB(connection);
 
-            }
+            return options.ApplyODataOptions(data);
         }
     }
     #endregion
 
     #region Get Afdeling by Key
-    [Endpoint<Afdeling, int>("afdelingen", EndpointMethod.Get)]
+    [Endpoint<Afdeling, int>(EndpointMethod.Get)]
     public class GetByKeyHandler(IDbConnection connection) : IEndpointGetByKeyHandler<Afdeling, int>
     {
         public async Task<Result<dynamic>> Handle(int key, ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
-            try
-            {
-                //Haal mijn data op, op de manier zoals wij dat fijn vinden
-                var data = await GetAfdelingFromDB(connection, key);
-                data.DatumOnly = new DateOnly(12, 12, 12);
-                data.Time2 = new TimeOnly(1, 1, 1);
-                data.TestFlag = FlagTest.A | FlagTest.B | FlagTest.C | FlagTest.D | FlagTest.E | FlagTest.F;
-                data.Datum = DateTimeOffset.Now;
-                data.Datum3 = new(DateTime.Now.Ticks, DateTimeKind.Local);
-                data.Rechten = Rechten.Read | Rechten.Write;
-                data.TestEnum = Test32.E;
+            //Haal mijn data op, op de manier zoals wij dat fijn vinden
+            var data = await GetAfdelingFromDB(connection, key);
+            data.DatumOnly = new DateOnly(12, 12, 12);
+            data.Time2 = new TimeOnly(1, 1, 1);
+            data.TestFlag = FlagTest.A | FlagTest.B | FlagTest.C | FlagTest.D | FlagTest.E | FlagTest.F;
+            data.Datum = DateTimeOffset.Now;
+            data.Datum3 = new(DateTime.Now.Ticks, DateTimeKind.Local);
+            data.Rechten = Rechten.Read | Rechten.Write;
+            data.TestEnum = Test32.E;
 
-                //Apply Odata Query Options to the data
-                return options.ApplyODataOptions(data);
-            }
-            catch (Exception ex)
-            {
-                return new Result<dynamic>
-                {
-                    IsSuccess = false,
-                    Exception = ex,
-                    Message = ex.Message,
-                    CustomResult = @"{ ""test"":""Deze functie is fout gegaan!""}",
-                    HttpStatusCode = System.Net.HttpStatusCode.NotAcceptable
-                };
-            }
+            //Apply Odata AfdelingQuery Options to the data
+            return options.ApplyODataOptions(data);
         }
     }
     #endregion
@@ -229,9 +262,10 @@ public class AfdelingHandlers
 
                 Afdeling afdeling = domainObjectDelta.Post();
                 domainObjectDelta.TryPost(out afdeling);
-                //
+
                 //Do something with the entity
-                //x.Data = entity;
+
+                x.Data = afdeling;
                 x.IsSuccess = true;
                 x.HttpStatusCode = System.Net.HttpStatusCode.OK;
             }
@@ -251,7 +285,7 @@ public class AfdelingHandlers
         }
     }
 
-    [Endpoint<Afdeling, int>("afdelingen", EndpointMethod.Patch)]
+    [Endpoint<Afdeling, int>(EndpointMethod.Patch)]
     public class PatchAfdelingHandler(IDbConnection connection) : IEndpointPatchHandler<Afdeling, int>
     {
         async Task<Result<dynamic>> IEndpointPatchHandler<Afdeling, int>.Handle(int key, Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
@@ -265,9 +299,6 @@ public class AfdelingHandlers
 
                 domainObjectDelta.ValidateModel(ModelValidationMode.Patch);
 
-                //Verwijder de key van de Delta Properties
-                //var keyPropertyName = KeyProperty<Afdeling>().Name;
-                //delta.TrySetPropertyValue(keyPropertyName, null);
                 domainObjectDelta.Patch(origineel);
 
                 result.Data = origineel;
@@ -305,7 +336,7 @@ public class AfdelingHandlers
         }
     }
 
-    [Endpoint<Afdeling, int>("afdelingen", EndpointMethod.Put)]
+    [Endpoint<Afdeling, int>(EndpointMethod.Put)]
     public class PutAfdelingHandler(IDbConnection connection) : IEndpointPutHandler<Afdeling, int>
     {
         public async Task<Result<dynamic>> Handle(int key, Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
@@ -319,10 +350,9 @@ public class AfdelingHandlers
 
                 domainObjectDelta.ValidateModel(ModelValidationMode.Put);
 
-                //Verwijder de key van de Delta Properties
-                //var keyPropertyName = KeyProperty<Afdeling>().Name;
-                //delta.TrySetPropertyValue(keyPropertyName, null);
+                domainObjectDelta.Put(origineel);
 
+                result.Data = origineel;
                 result.IsSuccess = true;
                 result.HttpStatusCode = System.Net.HttpStatusCode.OK;
             }
@@ -390,91 +420,23 @@ public class AfdelingHandlers
     #endregion
 
     #region Navigation Objects
-    [Endpoint<Afdeling, int, Medewerker>("afdelingen", "medewerkers/", EndpointMethod.Get)]
+    [Endpoint<Afdeling, int, Medewerker>(EndpointMethod.Get, "medewerkers")]
     public class GetMedewerkersHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Medewerker>
     {
         public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
         {
-            //We can use the TDomainObjectType to find the name of the key and then relate it to the TNavigationObjectForeignKey ;)
-
-            Result<dynamic> x = new();
-            await Task.CompletedTask;
-            try
-            {
-                connection.Open();
-                //Due to the Left join we need to Distinct the primary object
-                var data = await connection.QueryAsync<Medewerker>("SELECT * FROM dbo.Medewerkers WHERE AfdelingId = @AfdelingId", new { AfdelingId = key });
-                //Haal mijn data op, op de manier zoals wij dat fijn vinden
-                ODataQuerySettings settings = new()
-                {
-                    PageSize = options.PageSize
-                };
-                var result = options.ApplyTo(data.AsQueryable(), settings);
-                x.Data = result;
-                x.IsSuccess = true;
-                x.HttpStatusCode = System.Net.HttpStatusCode.OK;
-            }
-            catch (ODataException ex)
-            {
-                x = new()
-                {
-                    IsSuccess = false,
-                    Exception = ex,
-                    Message = ex.Message,
-                    CustomResult = @"{ ""test"":""Deze functie is fout gegaan!""}",
-                    //x.Failed("Deze functie is fout gegaan2!");
-                    HttpStatusCode = System.Net.HttpStatusCode.NotAcceptable
-                };
-            }
-            finally
-            {
-                if (connection.State == ConnectionState.Open)
-                    connection.Close();
-            }
-            return x;
+            var data = await GetMedewerkersFromDB(connection, key);
+            return options.ApplyODataOptions(data);
         }
     }
 
-    [Endpoint<Afdeling, int, Bedrijf>("afdelingen", "bedrijf", EndpointMethod.Get)]
+    [Endpoint<Afdeling, int, Bedrijf>("afdelingen", EndpointMethod.Get, "bedrijf")]
     public class GetBedrijfHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Bedrijf>
     {
         public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Bedrijf> options, CancellationToken cancellationToken)
         {
-            Result<dynamic> x = new();
-            await Task.CompletedTask;
-            try
-            {
-                connection.Open();
-                //Due to the Left join we need to Distinct the primary object
-                var data = await connection.QueryAsync<Bedrijf>("SELECT * FROM dbo.Bedrijf WHERE Id = (SELECT TOP 1 BedrijfId FROM dbo.Afdeling WHERE Id = @AfdelingId)", new { AfdelingId = key });
-                //Haal mijn data op, op de manier zoals wij dat fijn vinden
-                ODataQuerySettings settings = new()
-                {
-                    PageSize = options.PageSize
-                };
-                var result = options.ApplyTo(data.AsQueryable(), settings);
-                x.Data = result;
-                x.IsSuccess = true;
-                x.HttpStatusCode = System.Net.HttpStatusCode.OK;
-            }
-            catch (ODataException ex)
-            {
-                x = new()
-                {
-                    IsSuccess = false,
-                    Exception = ex,
-                    Message = ex.Message,
-                    CustomResult = @"{ ""test"":""Deze functie is fout gegaan!""}",
-                    //x.Failed("Deze functie is fout gegaan2!");
-                    HttpStatusCode = System.Net.HttpStatusCode.NotAcceptable
-                };
-            }
-            finally
-            {
-                if (connection.State == ConnectionState.Open)
-                    connection.Close();
-            }
-            return x;
+            var data = await GetBedrijfFromDB(connection, key);
+            return options.ApplyODataOptions(data);
         }
     }
     #endregion 

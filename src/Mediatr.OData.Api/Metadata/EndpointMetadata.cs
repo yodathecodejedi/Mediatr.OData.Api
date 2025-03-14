@@ -24,6 +24,7 @@ public class EndpointMetadata
 
     internal static EndpointMetadata Create(Type targetType, EndpointAttribute endpointAttribute)
     {
+        targetType.TryGetGroupRoute(out var groupRoute);
         endpointAttribute.TryGetRoute(out var route);
         endpointAttribute.TryGetRouteSegment(out var routeSegment);
         endpointAttribute.TryGetHttpMethod(out var httpMethod);
@@ -38,6 +39,9 @@ public class EndpointMetadata
         var domainObjectAuthorizeAttribute = domainObjectType.GetCustomAttribute<ObjectAuthorizeAttribute>() ?? default!;
         IAuthorizeData authorizeData = (IAuthorizeData)endpointAuthorizeAttribute ?? (IAuthorizeData)domainObjectAuthorizeAttribute ?? default!;
 
+        if (string.IsNullOrEmpty(route) && string.IsNullOrEmpty(groupRoute))
+            throw new MissingMemberException($"The endpoint route/grouping is not declared in {targetType.FullName} or its parent. Please use EndpointAttribute on {targetType.FullName} or EndpointGroupAttribute on its parent.");
+
         var serviceType = TryGetServiceType(httpMethod, domainObjectType, keyType, navigationObjectType);
         var serviceDescriptor = new ServiceDescriptor(serviceType, targetType, ServiceLifetime.Transient) ?? default!;
 
@@ -51,7 +55,7 @@ public class EndpointMetadata
             KeyInRoute = keyInRoute,
             KeyType = keyType,
             NavigationObjectType = navigationObjectType,
-            Route = route,
+            Route = string.IsNullOrEmpty(route) ? groupRoute : route,
             RouteSegment = routeSegment,
             ServiceDescriptor = serviceDescriptor
         } ?? default!;

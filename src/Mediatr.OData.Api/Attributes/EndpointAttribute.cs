@@ -6,25 +6,19 @@ namespace Mediatr.OData.Api.Attributes;
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
 public abstract class EndpointAttribute : Attribute
 {
+    #region Properties
     public string Route { get; set; } = string.Empty;
     public bool KeyInRoute { get; protected set; } = false;
     public string RouteSegment { get; set; } = string.Empty;
     public EndpointMethod HttpMethod { get; set; } = EndpointMethod.Get;
     public EndpointBinding Binding { get; protected set; } = EndpointBinding.CustomBinding;
     public string? RoutePrefix { get; protected set; } = null;
+    #endregion
 
-
-    public EndpointAttribute() { }
-
-    public EndpointAttribute(string route)
+    #region Constructors
+    public EndpointAttribute(EndpointMethod httpMethod)
     {
-        Route = route;
-    }
-
-    public EndpointAttribute(string route, string routeSegment)
-    {
-        Route = route;
-        RouteSegment = routeSegment;
+        HttpMethod = httpMethod;
     }
 
     public EndpointAttribute(string route, EndpointMethod httpMethod)
@@ -33,20 +27,34 @@ public abstract class EndpointAttribute : Attribute
         HttpMethod = httpMethod;
     }
 
-    public EndpointAttribute(string route, string routeSegment, EndpointMethod httpMethod)
+    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment)
+    {
+        RouteSegment = routeSegment;
+        HttpMethod = httpMethod;
+    }
+
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment)
     {
         Route = route;
         RouteSegment = routeSegment;
         HttpMethod = httpMethod;
     }
 
-    public EndpointAttribute(string route, string routeSegment, EndpointMethod httpMethod, string routePrefix)
+    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment, string routePrefix)
+    {
+        RouteSegment = routeSegment;
+        HttpMethod = httpMethod;
+        RoutePrefix = routePrefix;
+    }
+
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment, string routePrefix)
     {
         Route = route;
         RouteSegment = routeSegment;
         HttpMethod = httpMethod;
         RoutePrefix = routePrefix;
     }
+    #endregion
 }
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
@@ -55,7 +63,7 @@ public sealed class EndpointAttribute<TDomainObject> : EndpointAttribute
 {
     public Type DomainObjectType => typeof(TDomainObject);
 
-    public EndpointAttribute(string route, string routeSegment) : base(route, routeSegment)
+    public EndpointAttribute(EndpointMethod httpMethod) : base(httpMethod)
     {
         Binding = EndpointBinding.DomainObjectBinding;
     }
@@ -65,12 +73,22 @@ public sealed class EndpointAttribute<TDomainObject> : EndpointAttribute
         Binding = EndpointBinding.DomainObjectBinding;
     }
 
-    public EndpointAttribute(string route, string routeSegment, EndpointMethod httpMethod) : base(route, routeSegment, httpMethod)
+    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment) : base(httpMethod, routeSegment)
     {
         Binding = EndpointBinding.DomainObjectBinding;
     }
 
-    public EndpointAttribute(string route, string routeSegment, EndpointMethod httpMethod, string routePrefix) : base(route, routeSegment, httpMethod, routePrefix)
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment) : base(route, httpMethod, routeSegment)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+    }
+
+    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(httpMethod, routeSegment, routePrefix)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+    }
+
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(route, httpMethod, routeSegment, routePrefix)
     {
         Binding = EndpointBinding.DomainObjectBinding;
     }
@@ -85,7 +103,7 @@ public sealed class EndpointAttribute<TDomainObject, Tkey> : EndpointAttribute
     public Type DomainObjectType => typeof(TDomainObject);
     public Type KeyType => typeof(Tkey);
 
-    public EndpointAttribute(string route, string routeSegment) : base(route, routeSegment)
+    public EndpointAttribute(EndpointMethod httpMethod) : base(httpMethod)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;
@@ -97,13 +115,25 @@ public sealed class EndpointAttribute<TDomainObject, Tkey> : EndpointAttribute
         KeyInRoute = true;
     }
 
-    public EndpointAttribute(string route, string routeSegment, EndpointMethod httpMethod) : base(route, routeSegment, httpMethod)
+    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment) : base(httpMethod, routeSegment)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;
     }
 
-    public EndpointAttribute(string route, string routeSegment, EndpointMethod httpMethod, string routePrefix) : base(route, routeSegment, httpMethod, routePrefix)
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment) : base(route, httpMethod, routeSegment)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+        KeyInRoute = true;
+    }
+
+    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(httpMethod, routeSegment, routePrefix)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+        KeyInRoute = true;
+    }
+
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(route, httpMethod, routeSegment, routePrefix)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;
@@ -120,7 +150,7 @@ public sealed class EndpointAttribute<TDomainObject, Tkey, TNavigationObject> : 
     public Type KeyType => typeof(Tkey);
     public Type NavigationObjectType => typeof(TNavigationObject);
 
-    public EndpointAttribute(string route, string routeSegment) : base(route, routeSegment)
+    public EndpointAttribute(EndpointMethod httpMethod) : base(httpMethod)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;
@@ -132,13 +162,25 @@ public sealed class EndpointAttribute<TDomainObject, Tkey, TNavigationObject> : 
         KeyInRoute = true;
     }
 
-    public EndpointAttribute(string route, string routeSegment, EndpointMethod httpMethod) : base(route, routeSegment, httpMethod)
+    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment) : base(httpMethod, routeSegment)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;
     }
 
-    public EndpointAttribute(string route, string routeSegment, EndpointMethod httpMethod, string routePrefix) : base(route, routeSegment, httpMethod, routePrefix)
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment) : base(route, httpMethod, routeSegment)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+        KeyInRoute = true;
+    }
+
+    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(httpMethod, routeSegment, routePrefix)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+        KeyInRoute = true;
+    }
+
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(route, httpMethod, routeSegment, routePrefix)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Mediatr.OData.Api.Attributes;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 namespace Mediatr.OData.Api.Extensions;
@@ -23,5 +24,23 @@ public static class TypeExtensions
         propertyInfo ??= type.GetProperty(type.Name + "Key") ?? default!;
 
         return (propertyInfo is not null);
+    }
+
+    public static bool TryGetGroupRoute(this Type? type, out string route)
+    {
+        route = string.Empty;
+        if (type is null)
+            return false;
+        Type? parentType = type.DeclaringType;
+        if (parentType != null)
+        {
+            var endpointGroupAttribute = parentType.GetCustomAttribute<EndpointGroupAttribute>() ?? default!;
+            if (endpointGroupAttribute != default!)
+            {
+                route = endpointGroupAttribute.GetPropertyValue("Route")?.ToString() ?? string.Empty;
+
+            }
+        }
+        return !string.IsNullOrEmpty(route);
     }
 }

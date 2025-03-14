@@ -10,7 +10,6 @@ using System.Data;
 
 namespace Mediatr.OData.Api.Example.EndpointHandlers;
 
-[EndpointRoute("medewerkers")]
 public class MedewerkerHandlers
 {
     public static string Query(bool withKey = false)

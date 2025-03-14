@@ -1,0 +1,7 @@
+Format Type	Example Output	Common Usage
+ISO 8601 (without "T")	"2025-03-22 12:21:01"	Some APIs, Legacy systems
+JavaScript Date.toISOString()	"Sat Mar 22 2025 12:21:01 GMT+0100"	JavaScript serialization
+Epoch (Unix Timestamp)	1742836861 (seconds) or 1742836861000 (milliseconds)	Many APIs, databases
+Custom US Format	"03/22/2025 12:21:01 PM"	US-based applications
+ 
+Custom European Format	"22-03-2025 12:21:01"	European APIs
