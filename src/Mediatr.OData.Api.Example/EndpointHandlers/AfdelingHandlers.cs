@@ -6,8 +6,8 @@ using Mediatr.OData.Api.Extensions;
 using Mediatr.OData.Api.Interfaces;
 using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.OData.Deltas;
-using Microsoft.OData;
 using System.Data;
+using System.Net;
 
 namespace Mediatr.OData.Api.Example.EndpointHandlers;
 
@@ -249,40 +249,25 @@ public class AfdelingHandlers
     #endregion
 
     #region Patch / Post / Put
-    [Endpoint<Afdeling>("afdelingen", EndpointMethod.Post)]
+    [Endpoint<Afdeling>(EndpointMethod.Post)]
     public class PostAfdelingHandler : IEndpointPostHandler<Afdeling>
     {
         async Task<Result<dynamic>> IEndpointPostHandler<Afdeling>.Handle(Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
         {
-            Result<dynamic> x = new();
-            await Task.CompletedTask;
+            return await Result.CreateProblem(HttpStatusCode.BadRequest, "Not implemented yet");
+
             try
             {
                 var s = domainObjectDelta.ValidateModel(ModelValidationMode.Post);
 
-                Afdeling afdeling = domainObjectDelta.Post();
+                domainObjectDelta.TryPost(out Afdeling afdeling);
 
-                domainObjectDelta.TryPost(out afdeling);
-
-                //Do something with the entity
-
-                x.Data = afdeling;
-                x.IsSuccess = true;
-                x.HttpStatusCode = System.Net.HttpStatusCode.OK;
+                return await Result.CreateSuccess(afdeling, HttpStatusCode.OK);
             }
-            catch (ODataException ex)
+            catch (Exception ex)
             {
-                x = new()
-                {
-                    IsSuccess = false,
-                    Exception = ex,
-                    Message = ex.Message,
-                    CustomResult = @"{ ""test"":""Deze functie is fout gegaan!""}",
-                    //x.Failed("Deze functie is fout gegaan2!");
-                    HttpStatusCode = System.Net.HttpStatusCode.NotAcceptable
-                };
+                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
             }
-            return x;
         }
     }
 
@@ -291,8 +276,6 @@ public class AfdelingHandlers
     {
         async Task<Result<dynamic>> IEndpointPatchHandler<Afdeling, int>.Handle(int key, Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
         {
-            Result<dynamic> result = new();
-
             try
             {
                 //Originele record
@@ -301,23 +284,13 @@ public class AfdelingHandlers
                 domainObjectDelta.ValidateModel(ModelValidationMode.Patch);
 
                 domainObjectDelta.Patch(origineel);
-
-                result.Data = origineel;
-                result.IsSuccess = true;
-                result.HttpStatusCode = System.Net.HttpStatusCode.OK;
+                return await Result.CreateSuccess(origineel, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
-                result = new()
-                {
-                    IsSuccess = false,
-                    Exception = ex,
-                    Message = ex.Message,
-                    CustomResult = @"{ ""test"":""Deze functie is fout gegaan!""}",
-                    HttpStatusCode = System.Net.HttpStatusCode.NotAcceptable
-                };
+                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
             }
-            return result;
+
             //These are all properties that COULD be patched but still we need to omit the ones that contain the default value or are null
             //var properties = GetProperties<Afdeling>(OperationType.Patch, entity);
 
@@ -352,23 +325,13 @@ public class AfdelingHandlers
                 domainObjectDelta.ValidateModel(ModelValidationMode.Put);
 
                 domainObjectDelta.Put(origineel);
-
-                result.Data = origineel;
-                result.IsSuccess = true;
-                result.HttpStatusCode = System.Net.HttpStatusCode.OK;
+                return await Result.CreateSuccess(origineel, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
-                result = new()
-                {
-                    IsSuccess = false,
-                    Exception = ex,
-                    Message = ex.Message,
-                    CustomResult = @"{ ""test"":""Deze functie is fout gegaan!""}",
-                    HttpStatusCode = System.Net.HttpStatusCode.NotAcceptable
-                };
+                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
             }
-            return result;
+
             //These are all properties that COULD be patched but still we need to omit the ones that contain the default value or are null
             //var properties = GetProperties<Afdeling>(OperationType.Patch, entity);
 
@@ -390,32 +353,19 @@ public class AfdelingHandlers
     #endregion
 
     #region Delete Afdeling
-    [Endpoint<Afdeling, int>("afdelingen", EndpointMethod.Delete)]
+    [Endpoint<Afdeling, int>(EndpointMethod.Delete)]
     public class DeleteAfdelingHandler : IEndpointDeleteHandler<Afdeling, int>
     {
         public async Task<Result<dynamic>> Handle(int key, CancellationToken cancellationToken)
         {
-            Result<dynamic> x = new();
-            await Task.CompletedTask;
             try
             {
-                //Do something with the entity
-                x.IsSuccess = true;
-                x.HttpStatusCode = System.Net.HttpStatusCode.OK;
+                return await Result.CreateSuccess(default!, HttpStatusCode.OK);
             }
-            catch (ODataException ex)
+            catch (Exception ex)
             {
-                x = new()
-                {
-                    IsSuccess = false,
-                    Exception = ex,
-                    Message = ex.Message,
-                    CustomResult = @"{ ""test"":""Deze functie is fout gegaan!""}",
-                    //x.Failed("Deze functie is fout gegaan2!");
-                    HttpStatusCode = System.Net.HttpStatusCode.NotAcceptable
-                };
+                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
             }
-            return x;
         }
     }
     #endregion
@@ -431,7 +381,7 @@ public class AfdelingHandlers
         }
     }
 
-    [Endpoint<Afdeling, int, Bedrijf>("afdelingen", EndpointMethod.Get, "bedrijf")]
+    [Endpoint<Afdeling, int, Bedrijf>(EndpointMethod.Get, "bedrijf")]
     public class GetBedrijfHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Bedrijf>
     {
         public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Bedrijf> options, CancellationToken cancellationToken)
@@ -440,5 +390,5 @@ public class AfdelingHandlers
             return options.ApplyODataOptions(data);
         }
     }
-    #endregion 
+    #endregion
 }

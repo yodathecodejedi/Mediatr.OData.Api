@@ -148,6 +148,71 @@ public static class DeltaExtensions
         }
     }
 
+    public static T Patch<T>(this Delta<T> delta, T domainObject) where T : class, IDomainObject
+    {
+        ArgumentNullException.ThrowIfNull(delta, nameof(delta));
+        ArgumentNullException.ThrowIfNull(domainObject, nameof(domainObject));
+        try
+        {
+            if (delta.TryPatch(domainObject))
+                return domainObject;
+            else
+                return default!;
+        }
+        catch
+        {
+            return default!;
+        }
+    }
+    public static bool TryPatch<T>(this Delta<T> delta, T domainObject) where T : class, IDomainObject
+    {
+        ArgumentNullException.ThrowIfNull(delta, nameof(delta));
+        ArgumentNullException.ThrowIfNull(domainObject, nameof(domainObject));
+
+        try
+        {
+            delta.Patch(domainObject);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static T Put<T>(this Delta<T> delta, T domainObject) where T : class, IDomainObject
+    {
+        ArgumentNullException.ThrowIfNull(delta, nameof(delta));
+        ArgumentNullException.ThrowIfNull(domainObject, nameof(domainObject));
+        try
+        {
+            if (delta.TryPut(domainObject))
+                return domainObject;
+            else
+                return default!;
+        }
+        catch
+        {
+            return default!;
+        }
+    }
+
+    public static bool TryPut<T>(this Delta<T> delta, T domainObject) where T : class, IDomainObject
+    {
+        ArgumentNullException.ThrowIfNull(delta, nameof(delta));
+        ArgumentNullException.ThrowIfNull(domainObject, nameof(domainObject));
+        try
+        {
+            delta.Put(domainObject);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
     public static bool ValidateModel<T>(this Delta<T> delta, ModelValidationMode validationMode) where T : class
     {
         ArgumentNullException.ThrowIfNull(delta, nameof(delta));

@@ -36,6 +36,8 @@ public static class HttpResultExtensions
             { StatusCodes.Status500InternalServerError, (_, error) => Results.Problem(error) },
         };
 
+        var boolTest = responseMap.TryGetValue(statusCode, out Func<object?, string?, IResult>? value2);
+
         if (!responseMap.TryGetValue(statusCode, out Func<object?, string?, IResult>? value))
         {
 

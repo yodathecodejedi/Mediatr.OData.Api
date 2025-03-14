@@ -18,6 +18,37 @@ public class Result
     /// Return directly the custom result if it is not null.
     /// </summary>
     public object? CustomResult { get; set; }
+
+    public static async Task<Result<dynamic>> CreateProblem(HttpStatusCode statusCode, string message, Exception? exception = null)
+    {
+        await Task.CompletedTask;
+
+        if (statusCode == HttpStatusCode.OK || statusCode == HttpStatusCode.Created || statusCode == HttpStatusCode.Accepted)
+            throw new ArgumentException("Status code cannot be OK, Created or Accepted", nameof(statusCode));
+
+        return new Result<dynamic>
+        {
+            IsSuccess = false,
+            HttpStatusCode = statusCode,
+            Message = message,
+            Exception = exception
+        };
+    }
+
+    public static async Task<Result<dynamic>> CreateSuccess(object? data, HttpStatusCode statusCode)
+    {
+        await Task.CompletedTask;
+
+        if (statusCode != HttpStatusCode.OK && statusCode != HttpStatusCode.Created && statusCode != HttpStatusCode.Accepted)
+            throw new ArgumentException("Status code must be OK, Created or Accepted", nameof(statusCode));
+
+        return new Result<dynamic>
+        {
+            IsSuccess = true,
+            HttpStatusCode = statusCode,
+            Data = data
+        };
+    }
 }
 
 public class Result<T> : Result

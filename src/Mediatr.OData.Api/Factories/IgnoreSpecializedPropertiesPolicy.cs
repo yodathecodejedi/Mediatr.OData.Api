@@ -29,7 +29,18 @@ public class IgnoreSpecializedPropertiesPolicy : JsonConverterFactory
             var properties = type.GetProperties()
                 .Where(prop => prop.GetCustomAttribute<PropertyInternalAttribute>() == null);
 
-            if (value is ProblemDetails)
+            if (properties.Count() == 1 && properties.First().Name.Equals("Error"))
+            {
+                writer.WriteStartObject();
+                try
+                {
+                    var errorDescription = value.GetPropertyValue("Error")?.ToString() ?? default!;
+                    writer.WriteString("Error", errorDescription);
+                }
+                catch { }
+                writer.WriteEndObject();
+            }
+            else if (value is ProblemDetails)
             {
                 writer.WriteStartObject();
                 try
