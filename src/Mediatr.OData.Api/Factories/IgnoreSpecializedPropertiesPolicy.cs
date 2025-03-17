@@ -25,6 +25,8 @@ public class IgnoreSpecializedPropertiesPolicy : JsonConverterFactory
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
+            //Deze nog uitbreiden met de properties die je wilt negeren ofwel Hash 
+            //Mogelijk ook nog Id naar Key veranderen
             var type = typeof(T);
             var properties = type.GetProperties()
                 .Where(prop => prop.GetCustomAttribute<PropertyInternalAttribute>() == null);
@@ -34,7 +36,7 @@ public class IgnoreSpecializedPropertiesPolicy : JsonConverterFactory
                 writer.WriteStartObject();
                 try
                 {
-                    var errorDescription = value.GetPropertyValue("Error")?.ToString() ?? default!;
+                    var errorDescription = value?.GetPropertyValue("Error")?.ToString() ?? default!;
                     writer.WriteString("Error", errorDescription);
                 }
                 catch { }
