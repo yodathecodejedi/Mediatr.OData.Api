@@ -442,7 +442,7 @@ See the implementation for this scenario:
 ---
 
 ### Still to document is the OData Syntax 
-
+working on it
 ---
 
 ### Still to do is the work in progress (enhancements) that are on the roadmap
