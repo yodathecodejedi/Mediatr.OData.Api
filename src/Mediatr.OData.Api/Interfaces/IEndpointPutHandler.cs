@@ -5,5 +5,5 @@ namespace Mediatr.OData.Api.Interfaces;
 
 public interface IEndpointPutHandler<TDomainObject, TKey> where TDomainObject : class, IDomainObject<TKey>
 {
-    Task<Result<dynamic>> Handle(TKey key, Delta<TDomainObject> domainObjectDelta, CancellationToken cancellationToken);
+    Task<Result<dynamic>> Handle(TKey key, Delta<TDomainObject> domainObjectDelta, ODataQueryOptionsWithPageSize<TDomainObject> options, CancellationToken cancellationToken);
 }

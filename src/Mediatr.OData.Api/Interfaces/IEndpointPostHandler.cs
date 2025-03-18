@@ -6,6 +6,6 @@ namespace Mediatr.OData.Api.Interfaces;
 public interface IEndpointPostHandler<TDomainObject>
     where TDomainObject : class, IDomainObject
 {
-    Task<Result<dynamic>> Handle(Delta<TDomainObject> domainObjectDelta, CancellationToken cancellationToken);
+    Task<Result<dynamic>> Handle(Delta<TDomainObject> domainObjectDelta, ODataQueryOptionsWithPageSize<TDomainObject> options, CancellationToken cancellationToken);
 }
 

@@ -252,7 +252,7 @@ public class AfdelingHandlers
     [Endpoint<Afdeling>(EndpointMethod.Post)]
     public class PostAfdelingHandler : IEndpointPostHandler<Afdeling>
     {
-        async Task<Result<dynamic>> IEndpointPostHandler<Afdeling>.Handle(Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
+        async Task<Result<dynamic>> IEndpointPostHandler<Afdeling>.Handle(Delta<Afdeling> domainObjectDelta, ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
             return await Result.CreateProblem(HttpStatusCode.BadRequest, "Not implemented yet");
 
@@ -261,8 +261,7 @@ public class AfdelingHandlers
                 var s = domainObjectDelta.ValidateModel(ModelValidationMode.Post);
 
                 domainObjectDelta.TryPost(out Afdeling afdeling);
-
-                return await Result.CreateSuccess(afdeling, HttpStatusCode.OK);
+                return options.ApplyODataOptions(afdeling);
             }
             catch (Exception ex)
             {
@@ -274,7 +273,7 @@ public class AfdelingHandlers
     [Endpoint<Afdeling, int>(EndpointMethod.Patch)]
     public class PatchAfdelingHandler(IDbConnection connection) : IEndpointPatchHandler<Afdeling, int>
     {
-        async Task<Result<dynamic>> IEndpointPatchHandler<Afdeling, int>.Handle(int key, Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
+        async Task<Result<dynamic>> IEndpointPatchHandler<Afdeling, int>.Handle(int key, Delta<Afdeling> domainObjectDelta, ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
             try
             {
@@ -284,7 +283,7 @@ public class AfdelingHandlers
                 domainObjectDelta.ValidateModel(ModelValidationMode.Patch);
 
                 domainObjectDelta.Patch(origineel);
-                return await Result.CreateSuccess(origineel, HttpStatusCode.OK);
+                return options.ApplyODataOptions(origineel);
             }
             catch (Exception ex)
             {
@@ -313,7 +312,7 @@ public class AfdelingHandlers
     [Endpoint<Afdeling, int>(EndpointMethod.Put)]
     public class PutAfdelingHandler(IDbConnection connection) : IEndpointPutHandler<Afdeling, int>
     {
-        public async Task<Result<dynamic>> Handle(int key, Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
+        public async Task<Result<dynamic>> Handle(int key, Delta<Afdeling> domainObjectDelta, ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
             Result<dynamic> result = new();
 
@@ -325,7 +324,7 @@ public class AfdelingHandlers
                 domainObjectDelta.ValidateModel(ModelValidationMode.Put);
 
                 domainObjectDelta.Put(origineel);
-                return await Result.CreateSuccess(origineel, HttpStatusCode.OK);
+                return options.ApplyODataOptions(origineel);
             }
             catch (Exception ex)
             {

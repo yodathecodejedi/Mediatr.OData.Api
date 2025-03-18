@@ -6,20 +6,14 @@ using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData;
-using Microsoft.AspNetCore.OData.Abstracts;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
 
 namespace Mediatr.OData.Api.RequestHandlers;
 
 
-public class EndpointHandler<TDomainObject>(IConfiguration configuration, ODataMetadataContainer container
+public sealed class EndpointHandler<TDomainObject>(IConfiguration configuration, ODataMetadataContainer container
         , EndpointMetadata metadata) : IHttpRequestHandler
     where TDomainObject : class, IDomainObject
 {
@@ -40,12 +34,11 @@ public class EndpointHandler<TDomainObject>(IConfiguration configuration, ODataM
                    , [FromQuery] int? PageSize
                    , CancellationToken cancellationToken) =>
             {
-                var feature = AddODataFeature(httpContext);
-
+                var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
-                var opdataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
 
-                var result = await handler.Handle(opdataQueryOptions, cancellationToken);
+                var result = await handler.Handle(odataQueryOptions, cancellationToken);
                 return result.ToODataResults();
             })
             //.WithSummary($"Endpoint Get Summary")
@@ -59,14 +52,19 @@ public class EndpointHandler<TDomainObject>(IConfiguration configuration, ODataM
             var route = metadata.Route;
             var routeSegment = metadata.RouteSegment;
             route = routeSegment.IsNullOrWhiteSpace() ? "/" : $"/{routeSegment}";
-            routeHandlerBuilder = entityGroup.MapPost(route, async (HttpRequest httpRequest
+            routeHandlerBuilder = entityGroup.MapPost(route, async (HttpContext httpContext
                 , ODataModel<TDomainObject, Delta<TDomainObject>> domainObjectDelta
                 , [FromServices] IEndpointPostHandler<TDomainObject> handler
+                , [FromQuery] int? PageSize
                 , CancellationToken cancellationToken) =>
-                {
-                    var result = await handler.Handle(domainObjectDelta.Value!, cancellationToken);
-                    return result.ToODataResults();
-                })
+            {
+                var feature = httpContext.AddODataFeature();
+                var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
+                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+
+                var result = await handler.Handle(domainObjectDelta.Value!, odataQueryOptions, cancellationToken);
+                return result.ToODataResults();
+            })
             //.WithSummary($"Endpoint Get Summary")
             //.WithDisplayName($"endpoint Get DisplayName  {metadata.Name}")
             //.WithDescription("Endpoint get Description")
@@ -83,49 +81,9 @@ public class EndpointHandler<TDomainObject>(IConfiguration configuration, ODataM
         }
         return Task.CompletedTask;
     }
-
-    public static IODataFeature AddODataFeature(HttpContext httpContext)
-    {
-        var container = (httpContext.GetEndpoint()?.Metadata.OfType<ODataMetadataContainer>().SingleOrDefault()) ?? throw new InvalidOperationException("ODataMetadataContainer not found");
-        var odataOptions = httpContext.RequestServices.GetRequiredService<IOptions<ODataOptions>>().Value;
-
-        var entityName = httpContext.GetEndpoint()?.Metadata.OfType<EndpointMetadata>().SingleOrDefault()?.Route ?? throw new InvalidOperationException("Route not found");
-
-        IEdmNavigationSource edmNavigationSource = container.EdmModel.FindDeclaredNavigationSource(entityName);
-
-        var edmEntitySet = container.EdmModel.EntityContainer.FindEntitySet(entityName);
-        var entitySetSegment = new EntitySetSegment(edmEntitySet);
-        var segments = new List<ODataPathSegment> { entitySetSegment };
-
-        if (httpContext.Request.RouteValues.TryGetValue("key", out var key))
-        {
-            var entityType = edmNavigationSource.EntityType;
-            var keyName = edmNavigationSource.EntityType.DeclaredKey.SingleOrDefault();
-            keyName ??= edmNavigationSource.EntityType.Key().Single();
-
-            var keySegment = new KeySegment(
-                keys: new Dictionary<string, object> { { keyName.Name, key! } },
-                edmType: entityType,
-                navigationSource: edmNavigationSource);
-
-            segments.Add(keySegment);
-        }
-
-        var path = new ODataPath(segments);
-        var feature = new ODataFeature
-        {
-            Path = path,
-            Model = container.EdmModel,
-            RoutePrefix = container.RoutePrefix
-        };
-
-        httpContext.Features.Set<IODataFeature>(feature);
-        return feature;
-    }
-
 }
 
-public class EndpointHandler<TDomainObject, TKey>(IConfiguration configuration, ODataMetadataContainer container
+public sealed class EndpointHandler<TDomainObject, TKey>(IConfiguration configuration, ODataMetadataContainer container
         , EndpointMetadata metadata) : IHttpRequestHandler
     where TDomainObject : class, IDomainObject<TKey>
     where TKey : notnull
@@ -148,9 +106,7 @@ public class EndpointHandler<TDomainObject, TKey>(IConfiguration configuration, 
                                 , TKey key
                                 , CancellationToken cancellationToken) =>
             {
-
-                var feature = AddODataFeature(httpContext);
-
+                var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
                 var opdataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
 
@@ -170,8 +126,7 @@ public class EndpointHandler<TDomainObject, TKey>(IConfiguration configuration, 
                             , [FromServices] IEndpointDeleteHandler<TDomainObject, TKey> handler
                             , CancellationToken cancellationToken) =>
             {
-                var feature = AddODataFeature(httpContext);
-
+                var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
                 var opdataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
                 var result = await handler.Handle(key, cancellationToken);
@@ -190,13 +145,14 @@ public class EndpointHandler<TDomainObject, TKey>(IConfiguration configuration, 
                 , ODataModel<TDomainObject, TKey, Delta<TDomainObject>> domainObjectDelta
                 , TKey key
                 , [FromServices] IEndpointPatchHandler<TDomainObject, TKey> handler
+                , [FromQuery] int? PageSize
                 , CancellationToken cancellationToken) =>
                         {
-                            var feature = AddODataFeature(httpContext);
+                            var feature = httpContext.AddODataFeature();
                             var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
-                            var opdataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+                            var oDataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
 
-                            var result = await handler.Handle(key, domainObjectDelta.Value!, cancellationToken);
+                            var result = await handler.Handle(key, domainObjectDelta.Value!, oDataQueryOptions, cancellationToken);
                             return result.ToODataResults();
                         })
             //.WithSummary($"Endpoint Get Summary")
@@ -212,13 +168,14 @@ public class EndpointHandler<TDomainObject, TKey>(IConfiguration configuration, 
                    , ODataModel<TDomainObject, TKey, Delta<TDomainObject>> domainObjectDelta
                    , TKey key
                    , [FromServices] IEndpointPutHandler<TDomainObject, TKey> handler
+                   , [FromQuery] int? PageSize
                    , CancellationToken cancellationToken) =>
             {
-                var feature = AddODataFeature(httpContext);
+                var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
-                var opdataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
 
-                var result = await handler.Handle(key, domainObjectDelta.Value!, cancellationToken);
+                var result = await handler.Handle(key, domainObjectDelta.Value!, odataQueryOptions, cancellationToken);
                 return result.ToODataResults();
             })
             //.WithSummary($"Endpoint Get Summary")
@@ -236,51 +193,9 @@ public class EndpointHandler<TDomainObject, TKey>(IConfiguration configuration, 
         }
         return Task.CompletedTask;
     }
-
-    public static IODataFeature AddODataFeature(HttpContext httpContext)
-    {
-        var container = (httpContext.GetEndpoint()?.Metadata.OfType<ODataMetadataContainer>().SingleOrDefault()) ?? throw new InvalidOperationException("ODataMetadataContainer not found");
-        var odataOptions = httpContext.RequestServices.GetRequiredService<IOptions<ODataOptions>>().Value;
-
-        var entityName = httpContext.GetEndpoint()?.Metadata.OfType<EndpointMetadata>().SingleOrDefault()?.Route ?? throw new InvalidOperationException("Route not found");
-
-        IEdmNavigationSource edmNavigationSource = container.EdmModel.FindDeclaredNavigationSource(entityName);
-
-        var edmEntitySet = container.EdmModel.EntityContainer.FindEntitySet(entityName);
-        var entitySetSegment = new EntitySetSegment(edmEntitySet);
-        var segments = new List<ODataPathSegment> { entitySetSegment };
-
-
-        //Dit stukje voor de Navigation, GetByKey, En Navigation wel nodig (Delete, Put en Patch hebben dit niet nodig)
-        if (httpContext.Request.RouteValues.TryGetValue("key", out var key))
-        {
-            var entityType = edmNavigationSource.EntityType;
-            var keyName = edmNavigationSource.EntityType.DeclaredKey.SingleOrDefault();
-            keyName ??= edmNavigationSource.EntityType.Key().Single();
-
-            var keySegment = new KeySegment(
-                keys: new Dictionary<string, object> { { keyName.Name, key! } },
-                edmType: entityType,
-                navigationSource: edmNavigationSource);
-
-            segments.Add(keySegment);
-        }
-
-        var path = new ODataPath(segments);
-        var feature = new ODataFeature
-        {
-            Path = path,
-            Model = container.EdmModel,
-            RoutePrefix = container.RoutePrefix
-        };
-
-        httpContext.Features.Set<IODataFeature>(feature);
-        return feature;
-    }
-
 }
 
-public class EndpointHandler<TDomainObject, TKey, TNavigationObject>(IConfiguration configuration, ODataMetadataContainer container
+public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(IConfiguration configuration, ODataMetadataContainer container
         , EndpointMetadata metadata) : IHttpRequestHandler
     where TDomainObject : class, IDomainObject
     where TKey : notnull
@@ -304,11 +219,12 @@ public class EndpointHandler<TDomainObject, TKey, TNavigationObject>(IConfigurat
         {
             routeHandlerBuilder = entityGroup.MapGet(route, async (HttpContext httpContext
                    , [FromServices] IEndpoinGetByNavigationHandler<TDomainObject, TKey, TNavigationObject> handler
+                   , [FromQuery] int? PageSize
                    , TKey key
                    , CancellationToken cancellationToken) =>
             {
-                var feature = AddODataFeature(httpContext);
-
+                //var feature = AddODataFeature(httpContext);
+                var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TNavigationObject), feature.Path);
                 var odataQueryOptions = new ODataQueryOptionsWithPageSize<TNavigationObject>(configuration, odataQueryContext, httpContext.Request);
 
@@ -331,46 +247,4 @@ public class EndpointHandler<TDomainObject, TKey, TNavigationObject>(IConfigurat
         }
         return Task.CompletedTask;
     }
-
-    public static IODataFeature AddODataFeature(HttpContext httpContext)
-    {
-        var container = (httpContext.GetEndpoint()?.Metadata.OfType<ODataMetadataContainer>().SingleOrDefault()) ?? throw new InvalidOperationException("ODataMetadataContainer not found");
-        var odataOptions = httpContext.RequestServices.GetRequiredService<IOptions<ODataOptions>>().Value;
-
-        var entityName = httpContext.GetEndpoint()?.Metadata.OfType<EndpointMetadata>().SingleOrDefault()?.Route ?? throw new InvalidOperationException("Route not found");
-
-        IEdmNavigationSource edmNavigationSource = container.EdmModel.FindDeclaredNavigationSource(entityName);
-
-        var edmEntitySet = container.EdmModel.EntityContainer.FindEntitySet(entityName);
-        var entitySetSegment = new EntitySetSegment(edmEntitySet);
-        var segments = new List<ODataPathSegment> { entitySetSegment };
-
-
-        //Dit stukje voor de Navigation, GetByKey, En Navigation wel nodig (Delete, Put en Patch hebben dit niet nodig)
-        if (httpContext.Request.RouteValues.TryGetValue("key", out var key))
-        {
-            var entityType = edmNavigationSource.EntityType;
-            var keyName = edmNavigationSource.EntityType.DeclaredKey.SingleOrDefault();
-            keyName ??= edmNavigationSource.EntityType.Key().Single();
-
-            var keySegment = new KeySegment(
-                keys: new Dictionary<string, object> { { keyName.Name, key! } },
-                edmType: entityType,
-                navigationSource: edmNavigationSource);
-
-            segments.Add(keySegment);
-        }
-
-        var path = new ODataPath(segments);
-        var feature = new ODataFeature
-        {
-            Path = path,
-            Model = container.EdmModel,
-            RoutePrefix = container.RoutePrefix
-        };
-
-        httpContext.Features.Set<IODataFeature>(feature);
-        return feature;
-    }
-
 }

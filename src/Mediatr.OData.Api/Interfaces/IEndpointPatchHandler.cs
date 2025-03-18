@@ -4,5 +4,5 @@ using Microsoft.AspNetCore.OData.Deltas;
 namespace Mediatr.OData.Api.Interfaces;
 public interface IEndpointPatchHandler<TDomainObject, TKey> where TDomainObject : class, IDomainObject<TKey>
 {
-    Task<Result<dynamic>> Handle(TKey key, Delta<TDomainObject> domainObjectDelta, CancellationToken cancellationToken);
+    Task<Result<dynamic>> Handle(TKey key, Delta<TDomainObject> domainObjectDelta, ODataQueryOptionsWithPageSize<TDomainObject> options, CancellationToken cancellationToken);
 }
