@@ -1,4 +1,4 @@
-#OData Minimal API
+##OData Minimal API
 
 **OData Minimal API** is a lightweight framework build on **ASP.NET Core OData**, fully compatible with **.NET Core 8**. 
 
