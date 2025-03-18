@@ -56,7 +56,7 @@ So you actually only need 2 lines of code to make this work.
 
 ---
 
-###Step 3 Add the configuration for the OData API configuration to the appsettings.json
+### Step 3 Add the configuration for the OData API configuration to the appsettings.json
 Add the following section to your appsettings.json to configure the OData Api module
 
 ```Json
