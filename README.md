@@ -1,4 +1,4 @@
-# OData Minimal API
+##OData Minimal API
 
 **OData Minimal API** is a lightweight framework build on **ASP.NET Core OData**, fully compatible with **.NET Core 8**. 
 
@@ -73,7 +73,7 @@ For more detailed information on the appsettings please take a look at <referenc
 
 ---
 
-### Step 4 (optional) Add the configuration for the Entra authentication and authorization to your appsettings.json
+###Step 4 (optional) Add the configuration for the Entra authentication and authorization to your appsettings.json
 ```Json
   "Entra": {
     "Instance": "https://login.microsoftonline.com/",
@@ -88,7 +88,7 @@ For more detailed information on using Entra for Authentication and Authorizatio
 
 ---
 
-### Step 5 Create a DomainModel
+###Step 5 Create a DomainModel
 Make sure your classes implement the interface **IDomainObject** or **IDomainObject<Key>**. The framework checks if an object has one of these interfaces implemented. Objects without these interfaces implemented cannot be handled by the **OData Api framework**.
 
 As an example:
@@ -149,7 +149,7 @@ In the above example the DomainObject Company does **not** have the **interface 
 
 ---
 
-### Step 6 Create a GET handler implementation to actually have 2 endpoints
+###Step 6 Create a GET handler implementation to actually have 2 endpoints
 Now we work our magic to create and endpoint handler that actually processes a request and returns data with full OData support without you having to code some OData implementation or any HTTP integration.
 All you need to focus on is fetching your data. I have chosen for a dapper implementation in my example but you can use any provider you like as long as the data is transformed into the domainmodel and the result is IQueryable (if you have multiple records).
 
@@ -247,7 +247,7 @@ If you run your project now you will have successful integrated the 2 GET endpoi
 
 ---
 
-### Step 7 Create a POST handler implementation
+###Step 7 Create a POST handler implementation
 If you want to add the creation of a Department (Post) you can add the following snippet to the container class:
 ```C#
     [Endpoint<Department>(EndpointMethod.Post)]
@@ -280,7 +280,7 @@ So it is expected that the actual Id/Key of the department object is returned fr
 
 ---
 
-### Step 8 Create a PATCH or PUT handler implementation
+###Step 8 Create a PATCH or PUT handler implementation
 Both the PATCH and the PUT handler also work with a Delta<T> object with the same assumptions as with Post handler. The actual difference is that it works with the Key definition (like with the GetByKey handler) and any Id/Key that is supplied in the body is ignored automatic since the actual id/key is supplied in the route. And we use TryPatch and TryPut instead of TryPost. 
 Furthermore if we follow strict REST guidelines Patch would be used for partial updates and put for complete domainobjects. 
 
@@ -340,7 +340,7 @@ And example of the implementations of PUT and PATCH are below:
 
 ---
 
-### Step 9 Create a Delete handler implementation
+###Step 9 Create a Delete handler implementation
 When you want to implement the delete action on the Api you need to implement the Delete handler as shown below:
 
 ```C#
@@ -366,7 +366,7 @@ When you want to implement the delete action on the Api you need to implement th
 
 ---
 
-### Step 10 GET Navigation handler on related objects from within the same group
+###Step 10 GET Navigation handler on related objects from within the same group
 Something that OData does not standard support but what makes the usage more flexibel is the child object navigation.
 Think of the following scenario:
 You have a Department and inside a department there are Employees and you just fetched a specific department through
