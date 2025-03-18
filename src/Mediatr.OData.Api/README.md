@@ -12,6 +12,8 @@ On top of the OData support, out of the box a documentation and test UI is added
 
 Finally we have included the optional authentication and authorization features for Microsoft Entra for both the usage of the UI and the actual Api's themselves. Which can be configured independent from each other.
 
+---
+
 ### Step 1 Installation
 Using .NET CLI:
 ```bash
@@ -22,6 +24,8 @@ Using Package Manager:
 ```bash
 Install-Package Mediatr.OData.Api
 ```
+
+---
 
 ### Step 2 Add the necessary command to activate the package
 In the ASP.NET Core Mimimal API project, update your `Program.cs` as below:
@@ -50,6 +54,8 @@ app.Run();
 ```
 So you actually only need 2 lines of code to make this work.
 
+---
+
 ###Step 3 Add the configuration for the OData API configuration to the appsettings.json
 Add the following section to your appsettings.json to configure the OData Api module
 
@@ -65,6 +71,8 @@ Add the following section to your appsettings.json to configure the OData Api mo
 ```
 For more detailed information on the appsettings please take a look at <reference to Appsettings.json>
 
+---
+
 ###Step 4 (optional) Add the configuration for the Entra authentication and authorization to your appsettings.json
 ```Json
   "Entra": {
@@ -77,6 +85,8 @@ For more detailed information on the appsettings please take a look at <referenc
   }
 ```
 For more detailed information on using Entra for Authentication and Authorization please look at  <reference to Securing things with Entra>
+
+---
 
 ###Step 5 Create a DomainModel
 Make sure your classes implement the interface **IDomainObject** or **IDomainObject<Key>**. The framework checks if an object has one of these interfaces implemented. Objects without these interfaces implemented cannot be handled by the **OData Api framework**.
@@ -136,6 +146,8 @@ public class Company:
 Please take a look at DomainObjects <reference to DomainObjects> for the usage of all attribute options and the default determinations.
 
 In the above example the DomainObject Company does **not** have the **interface IDomainObject<Key>** implemented, this means it is still part of the domain model but you **can not** create an API endpoint on Company. But you can attach it as an $Expand to any OData query and result to the Endpoints for Department and Employee. 
+
+---
 
 ###Step 6 Create a GET handler implementation to actually have 2 endpoints
 Now we work our magic to create and endpoint handler that actually processes a request and returns data with full OData support without you having to code some OData implementation or any HTTP integration.
@@ -233,7 +245,9 @@ public class DepartmentHandlers
 ```
 If you run your project now you will have successful integrated the 2 GET endpoints for the Department domainObject including full OData support.
 
-###Step 6 Create a POST handler implementation
+---
+
+###Step 7 Create a POST handler implementation
 If you want to add the creation of a Department (Post) you can add the following snippet to the container class:
 ```C#
     [Endpoint<Department>(EndpointMethod.Post)]
@@ -264,7 +278,9 @@ And it operates under the assumption that the generation of a new Id/Key is done
 
 So it is expected that the actual Id/Key of the department object is returned from your own code before we return the created object.
 
-###Step 7 Create a PATCH or PUT handler implementation
+---
+
+###Step 8 Create a PATCH or PUT handler implementation
 Both the PATCH and the PUT handler also work with a Delta<T> object with the same assumptions as with Post handler. The actual difference is that it works with the Key definition (like with the GetByKey handler) and any Id/Key that is supplied in the body is ignored automatic since the actual id/key is supplied in the route. And we use TryPatch and TryPut instead of TryPost. 
 Furthermore if we follow strict REST guidelines Patch would be used for partial updates and put for complete domainobjects. 
 
@@ -321,7 +337,10 @@ And example of the implementations of PUT and PATCH are below:
         }
     }
 ```
-###Step 8 Create a Delete handler implementation
+
+---
+
+###Step 9 Create a Delete handler implementation
 When you want to implement the delete action on the Api you need to implement the Delete handler as shown below:
 
 ```C#
@@ -345,465 +364,94 @@ When you want to implement the delete action on the Api you need to implement th
     }
 ```
 
+---
+
+###Step 10 GET Navigation handler on related objects from within the same group
+Something that OData does not standard support but what makes the usage more flexibel is the child object navigation.
+Think of the following scenario:
+You have a Department and inside a department there are Employees and you just fetched a specific department through
+the endpoint:
+```curl
+https://somedomain/odata/departments/{key}
+```
+And now you would like to have in a new call all employees that belong to this department.
+In a normal OData restfull world you would do the following:
+```curl
+https://somedomain/odata/employees?filter=departmentId eq {key}
+```
+This means you need to be aware of the foreign key name and create a filter.
+We included a nicer way (just like the Microsoft Graph API explorer) to do just this by supporting the following:
+```curl
+https://somedomain/odata/departments/{key}/employees
+```
+As you can see this syntax is much simpler for the end-user of the API and does not require a lot of work at all.
+All you need to do is to include a navigationtype endpoint in the same group.
+See the implementation for the above example:
+
 ```C#
-using Dapper;
-using Mediatr.OData.Api.Attributes;
-using Mediatr.OData.Api.Enumerations;
-using Mediatr.OData.Api.Example.DomainObjects;
-using Mediatr.OData.Api.Extensions;
-using Mediatr.OData.Api.Interfaces;
-using Mediatr.OData.Api.Models;
-using Microsoft.AspNetCore.OData.Deltas;
-using System.Data;
-using System.Net;
-
-namespace Mediatr.OData.Api.Example.EndpointHandlers;
-
-//This is the container class that holds (in this case) all endpoints for the domainobject 'Department'
-
-//For easy of use you can add this attribute all endpoints inside this container class
-//So the endpoints will be http(s)://somedomain/odata/departments 
-//This way you don't have to specify the route on each endpoint (saves a parameter)
-[EndpointGroup("departments")] 
-public class DepartmentHandlers
-{
-    //Some helper function to get the query for the data
-    public static string DepartmentQuery(bool withKey = false)
-    { ...}
-
-    //Some helper function to get the query for the data
-    public static string EmployeeQuery()
-    { .. }
-
-    //Some helper function to get the query for the data   
-    public static string CompanyQuery()
-    { ... }
-
-    //Some helper function to get the query for the data
-    public static async Task<IQueryable<Department>> GetDepartmentsFromDB(IDbConnection connection)
-    { ... }
-
-    //Some helper function to get the query for the data
-    public static async Task<Department> GetDepartmentFromDB(IDbConnection connection, int key)
-    { ... }
-    
-    //Some helper function to get the query for the data
-    public static async Task<IQueryable<Employee>> GetEmployeesFromDB(IDbConnection connection, int key)
-    { ... }
-
-    //Some helper function to get the query for the data
-    public static async Task<Company> GetCompaniesFromDB(IDbConnection connection, int key)
-    { ... }
-
-    [Endpoint<Department>(EndpointMethod.Get)]
-    public class GetHandler(IDbConnection connection) : IEndpointGetHandler<Department>
+    [Endpoint<Department, int, Employee>(EndpointMethod.Get, "employees")]
+    public class GetEmployeesHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Department, int, Employee>
     {
-        public async Task<Result<dynamic>> Handle(ODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
+        public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Employee> options, CancellationToken cancellationToken)
         {
-
-            //Get the data as IQuerable<Department>
-            var data = await GetDepartmentsFromDB(connection);
-     
-            //Apply OData syntax and return the result
+            var data = await GetEmployeesFromDB(connection, key);
             return options.ApplyODataOptions(data);
         }
     }
+```
+As you can see the implementation is very simple and If you plan your data access strategy smart, you will not have to write any special code to support the OData syntax on the result which gives you the same functionality as you would have when you would call the GET employees endpoint directly. But this one makes much more sense. It also means that you could decide not to include endpoints for domainobjects which you don't want to expose directly (for example when it does not require a post/put/patch/delete endpoint.) 
 
-    [Endpoint<Department, int>(EndpointMethod.Get)]
-    public class GetByKeyHandler(IDbConnection connection) : IEndpointGetByKeyHandler<Department, int>
+This method does not only work when there is a one to many relationship but also with one to one relationships.
+In our example this is Company. 
+See the implementation for this scenario:
+```C#
+    [Endpoint<Department, int, Company>(EndpointMethod.Get, "company")]
+    public class GetCompanyHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Department, int, Company>
     {
-        public async Task<Result<dynamic>> Handle(int key, ODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
+        public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Company> options, CancellationToken cancellationToken)
         {
-            //Get the data as Department
-            var data = await GetDepartmentFromDB(connection, key);
-            //Apply Odata syntax and return the result
+            var data = await GetCompanyFromDB(connection, key);
             return options.ApplyODataOptions(data);
         }
     }
-
-    #region Patch / Post / Put
-    [Endpoint<Afdeling>(EndpointMethod.Post)]
-    public class PostAfdelingHandler : IEndpointPostHandler<Afdeling>
-    {
-        async Task<Result<dynamic>> IEndpointPostHandler<Afdeling>.Handle(Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
-        {
-            return await Result.CreateProblem(HttpStatusCode.BadRequest, "Not implemented yet");
-
-            try
-            {
-                var s = domainObjectDelta.ValidateModel(ModelValidationMode.Post);
-
-                domainObjectDelta.TryPost(out Afdeling afdeling);
-
-                return await Result.CreateSuccess(afdeling, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
-            }
-        }
-    }
-
-    [Endpoint<Afdeling, int>(EndpointMethod.Patch)]
-    public class PatchAfdelingHandler(IDbConnection connection) : IEndpointPatchHandler<Afdeling, int>
-    {
-        async Task<Result<dynamic>> IEndpointPatchHandler<Afdeling, int>.Handle(int key, Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
-        {
-            try
-            {
-                //Originele record
-                var origineel = await GetAfdelingFromDB(connection, key);
-
-                domainObjectDelta.ValidateModel(ModelValidationMode.Patch);
-
-                domainObjectDelta.Patch(origineel);
-                return await Result.CreateSuccess(origineel, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
-            }
-
-            //These are all properties that COULD be patched but still we need to omit the ones that contain the default value or are null
-            //var properties = GetProperties<Afdeling>(OperationType.Patch, entity);
-
-            //Haal origineel op
-            //Nu nog de Delta Bepalen en de juiste properties eruit halen
-            //en dan het update statement dynamisch creeereren
-            //en uitvoeren.
-
-            //Stukje met etag lezen en toevoegen
-            //var etag = Request.Headers["If-Match"].FirstOrDefault();
-
-
-
-            //var delta = CompareObjects<Afdeling>(HTTPOperation.Patch, origineel, entity);
-
-            // var y = delta.GetChangedPropertyNames();
-        }
-    }
-
-    [Endpoint<Afdeling, int>(EndpointMethod.Put)]
-    public class PutAfdelingHandler(IDbConnection connection) : IEndpointPutHandler<Afdeling, int>
-    {
-        public async Task<Result<dynamic>> Handle(int key, Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
-        {
-            Result<dynamic> result = new();
-
-            try
-            {
-                //Originele record
-                var origineel = await GetAfdelingFromDB(connection, key);
-
-                domainObjectDelta.ValidateModel(ModelValidationMode.Put);
-
-                domainObjectDelta.Put(origineel);
-                return await Result.CreateSuccess(origineel, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
-            }
-
-            //These are all properties that COULD be patched but still we need to omit the ones that contain the default value or are null
-            //var properties = GetProperties<Afdeling>(OperationType.Patch, entity);
-
-            //Haal origineel op
-            //Nu nog de Delta Bepalen en de juiste properties eruit halen
-            //en dan het update statement dynamisch creeereren
-            //en uitvoeren.
-
-            //Stukje met etag lezen en toevoegen
-            //var etag = Request.Headers["If-Match"].FirstOrDefault();
-
-
-
-            //var delta = CompareObjects<Afdeling>(HTTPOperation.Patch, origineel, entity);
-
-            // var y = delta.GetChangedPropertyNames();
-        }
-    }
-    #endregion
-
-    #region Delete Afdeling
-    [Endpoint<Afdeling, int>(EndpointMethod.Delete)]
-    public class DeleteAfdelingHandler : IEndpointDeleteHandler<Afdeling, int>
-    {
-        public async Task<Result<dynamic>> Handle(int key, CancellationToken cancellationToken)
-        {
-            try
-            {
-                return await Result.CreateSuccess(default!, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
-            }
-        }
-    }
-    #endregion
-
-    #region Navigation Objects
-    [Endpoint<Afdeling, int, Medewerker>(EndpointMethod.Get, "medewerkers")]
-    public class GetMedewerkersHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Medewerker>
-    {
-        public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
-        {
-            var data = await GetMedewerkersFromDB(connection, key);
-            return options.ApplyODataOptions(data);
-        }
-    }
-
-    [Endpoint<Afdeling, int, Bedrijf>(EndpointMethod.Get, "bedrijf")]
-    public class GetBedrijfHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Bedrijf>
-    {
-        public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Bedrijf> options, CancellationToken cancellationToken)
-        {
-            var data = await GetBedrijfFromDB(connection, key);
-            return options.ApplyODataOptions(data);
-        }
-    }
-    #endregion
 }
 ```
-
+**Important note** : They key in the above 2 examples are actually the key of the Department you get supplied so you will have to navigate through your domain model based on that key.
 ```C#
-using Dapper;
-using Mediatr.OData.Api.Attributes;
-using Mediatr.OData.Api.Enumerations;
-using Mediatr.OData.Api.Example.DomainObjects;
-using Mediatr.OData.Api.Extensions;
-using Mediatr.OData.Api.Interfaces;
-using Mediatr.OData.Api.Models;
-using Microsoft.AspNetCore.OData.Deltas;
-using System.Data;
-using System.Net;
-
-namespace Mediatr.OData.Api.Example.EndpointHandlers;
-
-//This is the container class that holds (in this case) all endpoints for the domainobject 'Department'
-
-//For easy of use you can add this attribute all endpoints inside this container class
-//So the endpoints will be http(s)://somedomain/odata/departments 
-//This way you don't have to specify the route on each endpoint (saves a parameter)
-[EndpointGroup("departments")] 
-public class DepartmentHandlers
-{
-    //Some helper function to get the query for the data
-    public static string DepartmentQuery(bool withKey = false)
-    { ...}
-
-    //Some helper function to get the query for the data
-    public static string EmployeeQuery()
-    { .. }
-
-    //Some helper function to get the query for the data   
-    public static string CompanyQuery()
-    { ... }
-
-    //Some helper function to get the query for the data
-    public static async Task<IQueryable<Department>> GetDepartmentsFromDB(IDbConnection connection)
-    { ... }
-
-    //Some helper function to get the query for the data
-    public static async Task<Department> GetDepartmentFromDB(IDbConnection connection, int key)
-    { ... }
-    
-    //Some helper function to get the query for the data
-    public static async Task<IQueryable<Employee>> GetEmployeesFromDB(IDbConnection connection, int key)
-    { ... }
-
-    //Some helper function to get the query for the data
-    public static async Task<Company> GetCompaniesFromDB(IDbConnection connection, int key)
-    { ... }
-
-    [Endpoint<Department>(EndpointMethod.Get)]
-    public class GetHandler(IDbConnection connection) : IEndpointGetHandler<Department>
-    {
-        public async Task<Result<dynamic>> Handle(ODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
-        {
-
-            //Get the data as IQuerable<Department>
-            var data = await GetDepartmentsFromDB(connection);
-     
-            //Apply OData syntax and return the result
-            return options.ApplyODataOptions(data);
-        }
-    }
-
-    [Endpoint<Department, int>(EndpointMethod.Get)]
-    public class GetByKeyHandler(IDbConnection connection) : IEndpointGetByKeyHandler<Department, int>
-    {
-        public async Task<Result<dynamic>> Handle(int key, ODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
-        {
-            //Get the data as Department
-            var data = await GetDepartmentFromDB(connection, key);
-            //Apply Odata syntax and return the result
-            return options.ApplyODataOptions(data);
-        }
-    }
-
-    #region Patch / Post / Put
-    [Endpoint<Afdeling>(EndpointMethod.Post)]
-    public class PostAfdelingHandler : IEndpointPostHandler<Afdeling>
-    {
-        async Task<Result<dynamic>> IEndpointPostHandler<Afdeling>.Handle(Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
-        {
-            return await Result.CreateProblem(HttpStatusCode.BadRequest, "Not implemented yet");
-
-            try
-            {
-                var s = domainObjectDelta.ValidateModel(ModelValidationMode.Post);
-
-                domainObjectDelta.TryPost(out Afdeling afdeling);
-
-                return await Result.CreateSuccess(afdeling, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
-            }
-        }
-    }
-
-    [Endpoint<Afdeling, int>(EndpointMethod.Patch)]
-    public class PatchAfdelingHandler(IDbConnection connection) : IEndpointPatchHandler<Afdeling, int>
-    {
-        async Task<Result<dynamic>> IEndpointPatchHandler<Afdeling, int>.Handle(int key, Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
-        {
-            try
-            {
-                //Originele record
-                var origineel = await GetAfdelingFromDB(connection, key);
-
-                domainObjectDelta.ValidateModel(ModelValidationMode.Patch);
-
-                domainObjectDelta.Patch(origineel);
-                return await Result.CreateSuccess(origineel, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
-            }
-
-            //These are all properties that COULD be patched but still we need to omit the ones that contain the default value or are null
-            //var properties = GetProperties<Afdeling>(OperationType.Patch, entity);
-
-            //Haal origineel op
-            //Nu nog de Delta Bepalen en de juiste properties eruit halen
-            //en dan het update statement dynamisch creeereren
-            //en uitvoeren.
-
-            //Stukje met etag lezen en toevoegen
-            //var etag = Request.Headers["If-Match"].FirstOrDefault();
-
-
-
-            //var delta = CompareObjects<Afdeling>(HTTPOperation.Patch, origineel, entity);
-
-            // var y = delta.GetChangedPropertyNames();
-        }
-    }
-
-    [Endpoint<Afdeling, int>(EndpointMethod.Put)]
-    public class PutAfdelingHandler(IDbConnection connection) : IEndpointPutHandler<Afdeling, int>
-    {
-        public async Task<Result<dynamic>> Handle(int key, Delta<Afdeling> domainObjectDelta, CancellationToken cancellationToken)
-        {
-            Result<dynamic> result = new();
-
-            try
-            {
-                //Originele record
-                var origineel = await GetAfdelingFromDB(connection, key);
-
-                domainObjectDelta.ValidateModel(ModelValidationMode.Put);
-
-                domainObjectDelta.Put(origineel);
-                return await Result.CreateSuccess(origineel, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
-            }
-
-            //These are all properties that COULD be patched but still we need to omit the ones that contain the default value or are null
-            //var properties = GetProperties<Afdeling>(OperationType.Patch, entity);
-
-            //Haal origineel op
-            //Nu nog de Delta Bepalen en de juiste properties eruit halen
-            //en dan het update statement dynamisch creeereren
-            //en uitvoeren.
-
-            //Stukje met etag lezen en toevoegen
-            //var etag = Request.Headers["If-Match"].FirstOrDefault();
-
-
-
-            //var delta = CompareObjects<Afdeling>(HTTPOperation.Patch, origineel, entity);
-
-            // var y = delta.GetChangedPropertyNames();
-        }
-    }
-    #endregion
-
-    #region Delete Afdeling
-    [Endpoint<Afdeling, int>(EndpointMethod.Delete)]
-    public class DeleteAfdelingHandler : IEndpointDeleteHandler<Afdeling, int>
-    {
-        public async Task<Result<dynamic>> Handle(int key, CancellationToken cancellationToken)
-        {
-            try
-            {
-                return await Result.CreateSuccess(default!, HttpStatusCode.OK);
-            }
-            catch (Exception ex)
-            {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
-            }
-        }
-    }
-    #endregion
-
-    #region Navigation Objects
-    [Endpoint<Afdeling, int, Medewerker>(EndpointMethod.Get, "medewerkers")]
-    public class GetMedewerkersHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Medewerker>
-    {
-        public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
-        {
-            var data = await GetMedewerkersFromDB(connection, key);
-            return options.ApplyODataOptions(data);
-        }
-    }
-
-    [Endpoint<Afdeling, int, Bedrijf>(EndpointMethod.Get, "bedrijf")]
-    public class GetBedrijfHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Bedrijf>
-    {
-        public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Bedrijf> options, CancellationToken cancellationToken)
-        {
-            var data = await GetBedrijfFromDB(connection, key);
-            return options.ApplyODataOptions(data);
-        }
-    }
-    #endregion
-}
+   //Populate your domain model based on the department 
+   var department = GetDepartmentFromDB(key);
+   var employees = department.Employees.ToList();
+   var company = department.Company;
 ```
-```C#
-TODO
-```
+---
 
-
+### Still to describe is the Authorization usage
 
 ---
 
-## Key Features
-1. [Handler support  API](#1-common-crud-entity-api)
-   - [GET `/products` or `/products/{key}` with OData Query Options](#get-products-or-productskey-with-odata-query-options)
-   - [POST `/products` with 1-Level Nested Relationships](#post-products-with-1-level-nested-relationships)
-   - [PATCH `/products/{key}` with Partial Updates](#patch-productskey-with-partial-updates)
-   - [DELETE `/products/{key}`](#delete-productskey)
-2. [Authentication and Authorization](#4-authentication-and-authorization)
+### Still to describe is the detailed explanation of appsettings.json
 
+---
+
+### Still to describe is the detailed explanation of the Atrributes usage
+
+---
+
+### Still to descibe is the special functions to make Boolean, Values, Enumerations, DateTime functions more versatile compared to the default behaviour of any JSON serializere/deserializer
+
+---
+
+### Still to document is the OData Syntax 
+
+---
+
+### Still to do is the work in progress (enhancements) that are on the roadmap
+- Post/Put/Patch also support OData syntax (for select, expand etc, so you can omit values you don't need)
+- Multikeynavigation Department/{key}/Employees/{key}/Department/Company (for example)
+- Multilevel Patch/Put and Post new Department including Employees or new Employees
+- Other Authentication and Authorization implementations by the usage of a SecurityProvider instead of Entra only
+
+---
 
 #### GET: Query and get by key with OData query options:
 
@@ -821,43 +469,8 @@ The following OData query options are supported for both:
 | **$expand**    | `/products?$expand=category`         | Expand related `category` data for each product. | `SELECT p.Id, p.Name, p.Price, c.Id AS CategoryId, c.Name AS CategoryName FROM Products p JOIN Categories c ON p.CategoryId = c.Id;` |
 
 ---
-#### POST `/products` with 1-Level nested relationships:
 
-The framework supports creating:
-1. **Main Entity**: Insert a single entity into the database.
-2. **Child Entities (1 Level Nested)**: Handle child entities (either a single complex entity or a collection of entities) nested directly under the main entity.  
-   - **Existing Child Entities**: If the child item's ID exists in the database, it is ignored.
-   - **New Child Entities**: If the child item's ID is null or not in the database, it is inserted.
-
-| Scenario                          | Request Body                                                                                                                                         | Explanation                                                                                                                                                          |
-|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Main Entity Only**              | ```{ "name": "Product A", "price": 150.0 } ```                                                                                                  | Inserts the `Product` entity without any nested relationships.                                                                                                       |
-| **Main Entity with Single Child** | ```{ "name": "Product B", "price": 120.0, "category": { "name": "Electronics" } } ```                                                            | Inserts the `Product` entity and the `Category` entity if it doesn't exist. If the `Category` exists, it is associated with the `Product`.                          |
-| **Main Entity with Child List**   | ```{ "name": "Product C", "price": 200.0, "orders": [ { "id": 1, "quantity": 2 }, { "quantity": 3 } ] } ```                                      | Inserts the `Product` entity. Existing `Orders` (with `id`) are associated, and new `Orders` (without `id`) are inserted and associated.                            |
-
----
-
-#### PATCH `/products/{id}` with partial updates:
-
-The PATCH method supports updating specific fields of an existing <strong>ROOT</strong> entity. The request body should contain only the fields that need to be updated.
-
-| Scenario              | Request Body                                                                                         | SQL Generated                                                                                   | Explanation                                                                                  |
-|-----------------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| **Update Name Only**  | ```json { "name": "Updated Product A" } ```                                                         | ```sql UPDATE Products SET Name = 'Updated Product A' WHERE Id = 1; ```                        | Updates the `name` of the `Product` entity while leaving other fields unchanged.            |
-| **Update Price Only** | ```json { "price": 175.0 } ```                                                                      | ```sql UPDATE Products SET Price = 175.0 WHERE Id = 2; ```                                     | Updates the `price` of the `Product` entity while leaving other fields unchanged.           |
-| **Update Multiple**   | ```json { "name": "Updated Product B", "price": 200.0 } ```                                         | ```sql UPDATE Products SET Name = 'Updated Product B', Price = 200.0 WHERE Id = 3; ```        | Updates both `name` and `price` fields of the `Product` entity while leaving others intact. |
-
----
-#### DELETE `/products/{id}`:
-
-| Scenario              | SQL Generated                                                   | Explanation                                                                                  |
-|-----------------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| **Delete by ID**      | ```sql DELETE FROM Products WHERE Id = 1; ```                   | Deletes the `Product` entity with ID `1`.                                                   |
-
----
-
----
-### **4. Authentication and Authorization**
+### **Authentication and Authorization**
 
 The framework integrates seamlessly with ASP.NET Core's **authentication** and **authorization** mechanisms to provide secure access to entities and operations. This includes:
 
@@ -868,14 +481,13 @@ The framework integrates seamlessly with ASP.NET Core's **authentication** and *
 
 By following the ASP.NET Core model, the framework ensures compatibility with existing security configurations, such as `JwtBearer`, `CookieAuthentication`, or external providers (e.g., OAuth, OpenID Connect).
 
-### Example: Configuring Authorization for an Entity
+### Example: Configuring Authorization for an Domainobject
 ```csharp
-[Entity("multi-authorizations")]
 [EntityAuthorize(ApplyMethods = new[] { EntityMethod.Query })] // Only authorized users can query the entity.
 [EntityAuthorize(ApplyMethods = new[] { EntityMethod.GetByKey }, Roles = TestUtils.AdminRole)] // Admin-only access for GetByKey.
 [EntityAuthorize(ApplyMethods = new[] { EntityMethod.Post }, Roles = $"{TestUtils.AdminRole},{TestUtils.SupperAdminRole}")] // Admin and SuperAdmin access for Post.
 [EntityAuthorize(ApplyMethods = new[] { EntityMethod.Delete }, Roles = TestUtils.SupperAdminRole)] // SuperAdmin-only access for Delete.
-public class MultiAuthorization : IEntity<Guid>
+public class MultiAuthorization : IDomainObject<Guid>
 {
     public Guid Id { get; set; }
 }
