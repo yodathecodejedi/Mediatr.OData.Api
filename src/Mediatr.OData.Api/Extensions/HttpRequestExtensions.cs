@@ -1,4 +1,4 @@
-﻿using Mediatr.OData.Api.Interfaces;
+﻿using Mediatr.OData.Api.Abstractions.Interfaces;
 using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

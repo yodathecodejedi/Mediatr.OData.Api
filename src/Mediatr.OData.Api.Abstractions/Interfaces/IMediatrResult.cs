@@ -2,7 +2,7 @@
 
 namespace Mediatr.OData.Api.Abstractions.Interfaces
 {
-    public interface IODataResult
+    public interface IMediatrResult
     {
         bool IsSuccess { get; set; }
         string? Message { get; set; }
@@ -12,7 +12,7 @@ namespace Mediatr.OData.Api.Abstractions.Interfaces
         object? CustomResult { get; set; }
     }
 
-    public interface IODataResult<T> : IODataResult
+    public interface IMediatrResult<T> : IMediatrResult
     {
         new T? Data { get; set; }
     }

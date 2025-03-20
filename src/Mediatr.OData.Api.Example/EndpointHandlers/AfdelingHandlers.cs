@@ -1,9 +1,10 @@
 ﻿using Dapper;
-using Mediatr.OData.Api.Attributes;
-using Mediatr.OData.Api.Enumerations;
+using Mediatr.OData.Api.Abstractions.Attributes;
+using Mediatr.OData.Api.Abstractions.Enumerations;
+using Mediatr.OData.Api.Abstractions.Interfaces;
 using Mediatr.OData.Api.Example.DomainObjects;
 using Mediatr.OData.Api.Extensions;
-using Mediatr.OData.Api.Interfaces;
+using Mediatr.OData.Api.Factories;
 using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.OData.Deltas;
 using System.Data;
@@ -184,14 +185,14 @@ public class AfdelingHandlers
     //[CFW.ODataCore.Attributes.Class.EndpointAuthorize]
     //public class GenericHandler(IDbConnection connection) : CFW.ODataCore.Interfaces.Endpoints.IEndpointRequestHandler<CustomRequest>
     //{
-    //    public async Task<Result<dynamic>> Handle(CustomRequest request, CancellationToken cancellationToken)
+    //    public async Task<MediatrResult<dynamic>> Handle(CustomRequest request, CancellationToken cancellationToken)
     //    {
     //        try
     //        {
     //            //Haal mijn data op, op de manier zoals wij dat fijn vinden
     //            var data = await GetAfdelingenFromDB(connection);
     //            //Apply Odata AfdelingQuery Options to the data
-    //            return new Result<dynamic>
+    //            return new MediatrResult<dynamic>
     //            {
     //                IsSuccess = true,
     //                Data = data,
@@ -200,7 +201,7 @@ public class AfdelingHandlers
     //        }
     //        catch (Exception ex)
     //        {
-    //            return new Result<dynamic>
+    //            return new MediatrResult<dynamic>
     //            {
     //                IsSuccess = false,
     //                Exception = ex,
@@ -215,7 +216,7 @@ public class AfdelingHandlers
     [Endpoint<Afdeling>(EndpointMethod.Get)]
     public class GetHandler(IDbConnection connection) : IEndpointGetHandler<Afdeling>
     {
-        public async Task<Result<dynamic>> Handle(ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
+        public async Task<IMediatrResult<dynamic>> Handle(IODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
 
             //Haal mijn data op, op de manier zoals wij dat fijn vinden
@@ -230,7 +231,7 @@ public class AfdelingHandlers
     [Endpoint<Afdeling, int>(EndpointMethod.Get)]
     public class GetByKeyHandler(IDbConnection connection) : IEndpointGetByKeyHandler<Afdeling, int>
     {
-        public async Task<Result<dynamic>> Handle(int key, ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
+        public async Task<IMediatrResult<dynamic>> Handle(int key, IODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
             //Haal mijn data op, op de manier zoals wij dat fijn vinden
             var data = await GetAfdelingFromDB(connection, key);
@@ -252,9 +253,9 @@ public class AfdelingHandlers
     [Endpoint<Afdeling>(EndpointMethod.Post)]
     public class PostAfdelingHandler : IEndpointPostHandler<Afdeling>
     {
-        async Task<Result<dynamic>> IEndpointPostHandler<Afdeling>.Handle(Delta<Afdeling> domainObjectDelta, ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
+        async Task<IMediatrResult<dynamic>> IEndpointPostHandler<Afdeling>.Handle(Delta<Afdeling> domainObjectDelta, IODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
-            return await Result.CreateProblem(HttpStatusCode.BadRequest, "Not implemented yet");
+            return await MediatrResultFactory.CreateProblem(HttpStatusCode.BadRequest, "Not implemented yet");
 
             try
             {
@@ -265,7 +266,7 @@ public class AfdelingHandlers
             }
             catch (Exception ex)
             {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
+                return await MediatrResultFactory.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
             }
         }
     }
@@ -273,7 +274,7 @@ public class AfdelingHandlers
     [Endpoint<Afdeling, int>(EndpointMethod.Patch)]
     public class PatchAfdelingHandler(IDbConnection connection) : IEndpointPatchHandler<Afdeling, int>
     {
-        async Task<Result<dynamic>> IEndpointPatchHandler<Afdeling, int>.Handle(int key, Delta<Afdeling> domainObjectDelta, ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
+        async Task<IMediatrResult<dynamic>> IEndpointPatchHandler<Afdeling, int>.Handle(int key, Delta<Afdeling> domainObjectDelta, IODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
             try
             {
@@ -287,7 +288,7 @@ public class AfdelingHandlers
             }
             catch (Exception ex)
             {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
+                return await MediatrResultFactory.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
             }
 
             //These are all properties that COULD be patched but still we need to omit the ones that contain the default value or are null
@@ -312,9 +313,9 @@ public class AfdelingHandlers
     [Endpoint<Afdeling, int>(EndpointMethod.Put)]
     public class PutAfdelingHandler(IDbConnection connection) : IEndpointPutHandler<Afdeling, int>
     {
-        public async Task<Result<dynamic>> Handle(int key, Delta<Afdeling> domainObjectDelta, ODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
+        public async Task<IMediatrResult<dynamic>> Handle(int key, Delta<Afdeling> domainObjectDelta, IODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
-            Result<dynamic> result = new();
+            MediatrResult<dynamic> result = new();
 
             try
             {
@@ -328,7 +329,7 @@ public class AfdelingHandlers
             }
             catch (Exception ex)
             {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
+                return await MediatrResultFactory.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
             }
 
             //These are all properties that COULD be patched but still we need to omit the ones that contain the default value or are null
@@ -355,15 +356,15 @@ public class AfdelingHandlers
     [Endpoint<Afdeling, int>(EndpointMethod.Delete)]
     public class DeleteAfdelingHandler : IEndpointDeleteHandler<Afdeling, int>
     {
-        public async Task<Result<dynamic>> Handle(int key, CancellationToken cancellationToken)
+        public async Task<IMediatrResult<dynamic>> Handle(int key, CancellationToken cancellationToken)
         {
             try
             {
-                return await Result.CreateSuccess(default!, HttpStatusCode.OK);
+                return await MediatrResultFactory.CreateSuccess(default!, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
-                return await Result.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
+                return await MediatrResultFactory.CreateProblem(HttpStatusCode.BadRequest, ex.Message, ex);
             }
         }
     }
@@ -373,7 +374,7 @@ public class AfdelingHandlers
     [Endpoint<Afdeling, int, Medewerker>(EndpointMethod.Get, "medewerkers")]
     public class GetMedewerkersHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Medewerker>
     {
-        public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
+        public async Task<IMediatrResult<dynamic>> Handle(int key, Type TDomainObject, IODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
         {
             var data = await GetMedewerkersFromDB(connection, key);
             return options.ApplyODataOptions(data);
@@ -383,7 +384,7 @@ public class AfdelingHandlers
     [Endpoint<Afdeling, int, Bedrijf>(EndpointMethod.Get, "bedrijf")]
     public class GetBedrijfHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Bedrijf>
     {
-        public async Task<Result<dynamic>> Handle(int key, Type TDomainObject, ODataQueryOptionsWithPageSize<Bedrijf> options, CancellationToken cancellationToken)
+        public async Task<IMediatrResult<dynamic>> Handle(int key, Type TDomainObject, IODataQueryOptionsWithPageSize<Bedrijf> options, CancellationToken cancellationToken)
         {
             var data = await GetBedrijfFromDB(connection, key);
             return options.ApplyODataOptions(data);

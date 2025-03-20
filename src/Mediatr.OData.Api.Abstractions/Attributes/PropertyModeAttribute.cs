@@ -1,5 +1,4 @@
-﻿
-using Mediatr.OData.Api.Abstractions.Enumerations;
+﻿using Mediatr.OData.Api.Abstractions.Enumerations;
 
 namespace Mediatr.OData.Api.Abstractions.Attributes;
 

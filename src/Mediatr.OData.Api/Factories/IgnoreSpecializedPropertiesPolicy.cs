@@ -1,4 +1,4 @@
-﻿using Mediatr.OData.Api.Attributes;
+﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;

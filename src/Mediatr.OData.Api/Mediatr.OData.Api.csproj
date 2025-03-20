@@ -78,6 +78,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Mediatr.OData.Api.Abstractions\Mediatr.OData.Api.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

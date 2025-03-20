@@ -1,7 +1,7 @@
-﻿using Mediatr.OData.Api.Attributes;
-using Mediatr.OData.Api.Enumerations;
+﻿using Mediatr.OData.Api.Abstractions.Attributes;
+using Mediatr.OData.Api.Abstractions.Enumerations;
+using Mediatr.OData.Api.Abstractions.Interfaces;
 using Mediatr.OData.Api.Extensions;
-using Mediatr.OData.Api.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;

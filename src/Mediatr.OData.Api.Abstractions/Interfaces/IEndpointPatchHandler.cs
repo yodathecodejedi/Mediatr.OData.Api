@@ -3,5 +3,5 @@
 namespace Mediatr.OData.Api.Abstractions.Interfaces;
 public interface IEndpointPatchHandler<TDomainObject, TKey> where TDomainObject : class, IDomainObject<TKey>
 {
-    Task<IODataResult<dynamic>> Handle(TKey key, Delta<TDomainObject> domainObjectDelta, IODataQueryOptionsWithPageSize<TDomainObject> options, CancellationToken cancellationToken);
+    Task<IMediatrResult<dynamic>> Handle(TKey key, Delta<TDomainObject> domainObjectDelta, IODataQueryOptionsWithPageSize<TDomainObject> options, CancellationToken cancellationToken);
 }

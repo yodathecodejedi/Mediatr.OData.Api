@@ -1,6 +1,6 @@
-﻿using Mediatr.OData.Api.Enumerations;
+﻿using Mediatr.OData.Api.Abstractions.Enumerations;
+using Mediatr.OData.Api.Abstractions.Interfaces;
 using Mediatr.OData.Api.Extensions;
-using Mediatr.OData.Api.Interfaces;
 using Mediatr.OData.Api.Metadata;
 using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.Builder;
@@ -36,6 +36,7 @@ public sealed class EndpointHandler<TDomainObject>(ODataMetadataContainer contai
             {
                 var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
+                //Hier dus een Factory voor maken omdat het anders niet werkt
                 var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(odataQueryContext, httpContext.Request);
 
                 var result = await handler.Handle(odataQueryOptions, cancellationToken);
