@@ -12,7 +12,6 @@ public static class ODataQueryOptionsExtensions
 
         var single = data.FirstOrDefault(predicate);
 
-        //Haal mijn data op, op de manier zoals wij dat fijn vinden
         var result = options.ApplyTo(single, new ODataQuerySettings { },
         AllowedQueryOptions.OrderBy |
         AllowedQueryOptions.Filter |

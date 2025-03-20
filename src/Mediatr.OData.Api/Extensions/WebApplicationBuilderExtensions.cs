@@ -22,6 +22,7 @@ public static class WebApplicationBuilderExtensions
             ConfigurationSection = "OData";
 
         var configuration = builder.Configuration.GetSection(ConfigurationSection).Get<ODataConfiguration>() ?? new ODataConfiguration();
+        AppContext.SetData("ODataConfiguration", configuration);
 
         //Configure the HTTP Options
         builder.Services.ConfigureHttpJsonOptions(options =>
@@ -45,6 +46,7 @@ public static class WebApplicationBuilderExtensions
         //Because of Scalar / Swagger UI
         builder.Services.AddSwaggerGen(options =>
         {
+            options.OperationFilter<CountSchemaFilter>();
             options.SchemaFilter<ExcludePropertiesSchemaFilter>();
             options.SchemaFilter<EnumSchemaFilter>();
             if (configuration.SecureAPI)

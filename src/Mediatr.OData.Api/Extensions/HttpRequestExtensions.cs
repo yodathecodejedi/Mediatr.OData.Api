@@ -2,7 +2,6 @@
 using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Reflection;
@@ -13,10 +12,9 @@ namespace Mediatr.OData.Api.Extensions;
 
 public static class HttpRequestExtensions
 {
-    public static int GetPageSizeFromQueryString(this HttpRequest request, IConfiguration configuration)
+    public static int GetPageSizeFromQueryString(this HttpRequest request)
     {
-        var oDataConfiguration = configuration.GetSection("OData").Get<ODataConfiguration>() ?? new ODataConfiguration();
-
+        var oDataConfiguration = AppContext.GetData("ODataConfiguration") as ODataConfiguration ?? new ODataConfiguration();
         if (request.QueryString.HasValue is false)
             return oDataConfiguration.PageSize;
 

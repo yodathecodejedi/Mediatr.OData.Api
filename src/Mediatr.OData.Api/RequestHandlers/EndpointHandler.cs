@@ -8,12 +8,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
-using Microsoft.Extensions.Configuration;
 
 namespace Mediatr.OData.Api.RequestHandlers;
 
 
-public sealed class EndpointHandler<TDomainObject>(IConfiguration configuration, ODataMetadataContainer container
+public sealed class EndpointHandler<TDomainObject>(ODataMetadataContainer container
         , EndpointMetadata metadata) : IHttpRequestHandler
     where TDomainObject : class, IDomainObject
 {
@@ -29,6 +28,7 @@ public sealed class EndpointHandler<TDomainObject>(IConfiguration configuration,
             var route = metadata.Route;
             var routeSegment = metadata.RouteSegment;
             route = routeSegment.IsNullOrWhiteSpace() ? "/" : $"/{routeSegment}";
+            var routeCount = routeSegment.IsNullOrWhiteSpace() ? "/$count" : $"/{routeSegment}/$count";
             routeHandlerBuilder = entityGroup.MapGet(route, async (HttpContext httpContext
                    , [FromServices] IEndpointGetHandler<TDomainObject> handler
                    , [FromQuery] int? PageSize
@@ -36,7 +36,25 @@ public sealed class EndpointHandler<TDomainObject>(IConfiguration configuration,
             {
                 var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
-                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(odataQueryContext, httpContext.Request);
+
+                var result = await handler.Handle(odataQueryOptions, cancellationToken);
+                return result.ToODataResults();
+            })
+            //.WithSummary($"Endpoint Get Summary")
+            //.WithDisplayName($"endpoint Get DisplayName  {metadata.Name}")
+            //.WithDescription("Endpoint get Description")
+            .Produces<ODataQueryResult<TDomainObject>>();
+
+
+            routeHandlerBuilder = entityGroup.MapGet(routeCount, async (HttpContext httpContext
+                   , [FromServices] IEndpointGetHandler<TDomainObject> handler
+                   , [FromQuery] int? PageSize
+                   , CancellationToken cancellationToken) =>
+            {
+                var feature = httpContext.AddODataFeature();
+                var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
+                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(odataQueryContext, httpContext.Request);
 
                 var result = await handler.Handle(odataQueryOptions, cancellationToken);
                 return result.ToODataResults();
@@ -60,7 +78,7 @@ public sealed class EndpointHandler<TDomainObject>(IConfiguration configuration,
             {
                 var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
-                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(odataQueryContext, httpContext.Request);
 
                 var result = await handler.Handle(domainObjectDelta.Value!, odataQueryOptions, cancellationToken);
                 return result.ToODataResults();
@@ -83,7 +101,7 @@ public sealed class EndpointHandler<TDomainObject>(IConfiguration configuration,
     }
 }
 
-public sealed class EndpointHandler<TDomainObject, TKey>(IConfiguration configuration, ODataMetadataContainer container
+public sealed class EndpointHandler<TDomainObject, TKey>(ODataMetadataContainer container
         , EndpointMetadata metadata) : IHttpRequestHandler
     where TDomainObject : class, IDomainObject<TKey>
     where TKey : notnull
@@ -108,7 +126,7 @@ public sealed class EndpointHandler<TDomainObject, TKey>(IConfiguration configur
             {
                 var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
-                var opdataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+                var opdataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(odataQueryContext, httpContext.Request);
 
                 var result = await handler.Handle(key, opdataQueryOptions, cancellationToken);
                 return result.ToODataResults();
@@ -128,7 +146,7 @@ public sealed class EndpointHandler<TDomainObject, TKey>(IConfiguration configur
             {
                 var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
-                var opdataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+                var opdataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(odataQueryContext, httpContext.Request);
                 var result = await handler.Handle(key, cancellationToken);
                 return result.ToODataResults();
             })
@@ -150,7 +168,7 @@ public sealed class EndpointHandler<TDomainObject, TKey>(IConfiguration configur
                         {
                             var feature = httpContext.AddODataFeature();
                             var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
-                            var oDataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+                            var oDataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(odataQueryContext, httpContext.Request);
 
                             var result = await handler.Handle(key, domainObjectDelta.Value!, oDataQueryOptions, cancellationToken);
                             return result.ToODataResults();
@@ -173,7 +191,7 @@ public sealed class EndpointHandler<TDomainObject, TKey>(IConfiguration configur
             {
                 var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TDomainObject), feature.Path);
-                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(configuration, odataQueryContext, httpContext.Request);
+                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TDomainObject>(odataQueryContext, httpContext.Request);
 
                 var result = await handler.Handle(key, domainObjectDelta.Value!, odataQueryOptions, cancellationToken);
                 return result.ToODataResults();
@@ -195,7 +213,7 @@ public sealed class EndpointHandler<TDomainObject, TKey>(IConfiguration configur
     }
 }
 
-public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(IConfiguration configuration, ODataMetadataContainer container
+public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(ODataMetadataContainer container
         , EndpointMetadata metadata) : IHttpRequestHandler
     where TDomainObject : class, IDomainObject
     where TKey : notnull
@@ -213,7 +231,7 @@ public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(ICon
         ArgumentNullException.ThrowIfNull(routeSegment, nameof(routeSegment));
 
         route = string.Concat("/{key}/", routeSegment);
-
+        var routeCount = route.EndsWith("/") ? $"{route}$count" : $"{route}/$count";
         RouteHandlerBuilder? routeHandlerBuilder = null;
         if (metadata.HttpMethod == EndpointMethod.Get)
         {
@@ -223,10 +241,9 @@ public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(ICon
                    , TKey key
                    , CancellationToken cancellationToken) =>
             {
-                //var feature = AddODataFeature(httpContext);
                 var feature = httpContext.AddODataFeature();
                 var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TNavigationObject), feature.Path);
-                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TNavigationObject>(configuration, odataQueryContext, httpContext.Request);
+                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TNavigationObject>(odataQueryContext, httpContext.Request);
 
                 var result = await handler.Handle(key, typeof(TDomainObject), odataQueryOptions, cancellationToken);
 
@@ -236,6 +253,25 @@ public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(ICon
             //.WithDisplayName($"endpoint Get DisplayName  {metadata.Name}")
             //.WithDescription("Endpoint get Description")
             .Produces<ODataQueryResult<TDomainObject>>();
+
+            routeHandlerBuilder = entityGroup.MapGet(routeCount, async (HttpContext httpContext
+               , [FromServices] IEndpoinGetByNavigationHandler<TDomainObject, TKey, TNavigationObject> handler
+               , [FromQuery] int? PageSize
+               , TKey key
+               , CancellationToken cancellationToken) =>
+                    {
+                        var feature = httpContext.AddODataFeature();
+                        var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TNavigationObject), feature.Path);
+                        var odataQueryOptions = new ODataQueryOptionsWithPageSize<TNavigationObject>(odataQueryContext, httpContext.Request);
+
+                        var result = await handler.Handle(key, typeof(TDomainObject), odataQueryOptions, cancellationToken);
+
+                        return result.ToODataResults();
+                    })
+            //.WithSummary($"Endpoint Get Summary")
+            //.WithDisplayName($"endpoint Get DisplayName  {metadata.Name}")
+            //.WithDescription("Endpoint get Description")
+            .Produces<int>();
         }
 
         if (routeHandlerBuilder is null)

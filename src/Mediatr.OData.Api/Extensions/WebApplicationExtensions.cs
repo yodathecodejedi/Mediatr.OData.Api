@@ -1,23 +1,22 @@
 ﻿using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.OData;
 using Scalar.AspNetCore;
 
 namespace Mediatr.OData.Api.Extensions;
 
 public static class WebApplicationExtensions
 {
-    public static void AttachODataRoutes(this WebApplication? app, string ConfigurationSection = default!)
+    public static void AttachODataRoutes(this WebApplication? app)
     {
         if (app is null) return;
+
+        app.UseODataRouteDebug(); // Enables route debugging
 
         //This is our OData
         app.MapODataRoutes();
 
-        if (ConfigurationSection.IsNullOrWhiteSpace())
-            ConfigurationSection = Constants.OData.DefaultConfigurationSection;
-
-        var configuration = app.Configuration.GetSection(ConfigurationSection).Get<ODataConfiguration>() ?? new ODataConfiguration();
+        var configuration = AppContext.GetData("ODataConfiguration") as ODataConfiguration ?? new ODataConfiguration();
 
         // Configure the HTTP request pipeline.
         // This is our OData

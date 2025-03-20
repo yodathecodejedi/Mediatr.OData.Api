@@ -69,11 +69,11 @@ public class Afdeling : IDomainObject<int>
     public DateOnly DatumOnly { get; set; }
     public TimeOnly Time2 { get; set; }
 
-    public Medewerker[]? Test { get; set; } = [];
+    //public Medewerker[]? Medewerkers { get; set; } = [];
 
-    public List<Medewerker>? TestList { get; set; }
+    //public List<Medewerker>? Medewerkers { get; set; }
 
     public Bedrijf? Bedrijf { get; set; } = default!;
 
-    public ICollection<Medewerker>? Medewerkers { get; set; } = [];
+    public virtual ICollection<Medewerker>? Medewerkers { get; set; } = [];
 }
