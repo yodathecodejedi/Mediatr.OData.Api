@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <PackageOutputPath>$(SolutionDir)packages\pre-release</PackageOutputPath>
     <VersionPrefix>1.1.1</VersionPrefix>
-    <PackageVersionSufix>beta</PackageVersionSufix>
+    <PackageVersionSuffix>beta</PackageVersionSuffix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
