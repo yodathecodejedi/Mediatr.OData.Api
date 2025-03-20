@@ -1,9 +1,8 @@
 ﻿using Dapper;
-using Mediatr.OData.Api.Attributes;
-using Mediatr.OData.Api.Enumerations;
+using Mediatr.OData.Api.Abstractions.Attributes;
+using Mediatr.OData.Api.Abstractions.Enumerations;
+using Mediatr.OData.Api.Abstractions.Interfaces;
 using Mediatr.OData.Api.Example.DomainObjects;
-using Mediatr.OData.Api.Interfaces;
-using Mediatr.OData.Api.Models;
 using System.Data;
 
 namespace Mediatr.OData.Api.Example.EndpointHandlers;
@@ -39,7 +38,7 @@ public class MedewerkerHandlers
     {
 
 
-        public async Task<Result<dynamic>> Handle(ODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
+        public async Task<IMediatrResult<dynamic>> Handle(IODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
         {
             connection.Open();
 
@@ -62,7 +61,7 @@ public class MedewerkerHandlers
     [Endpoint<Medewerker, int>("medewerkers", EndpointMethod.Get)]
     public class GetByKeyHandler(IDbConnection connection) : IEndpointGetByKeyHandler<Medewerker, int>
     {
-        public async Task<Result<dynamic>> Handle(int key, ODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
+        public async Task<IMediatrResult<dynamic>> Handle(int key, IODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
         {
             connection.Open();
 

@@ -1,4 +1,4 @@
-﻿using Mediatr.OData.Api.Interfaces;
+﻿using Mediatr.OData.Api.Abstractions.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 

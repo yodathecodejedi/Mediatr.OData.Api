@@ -20,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipeline", "pipeline", "{D0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediatr.OData.Api.Example", "src\Mediatr.OData.Api.Example\Mediatr.OData.Api.Example.csproj", "{51D29576-43A6-8FBE-665A-509BB57B5FD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediatr.OData.Api.Abstractions", "src\Mediatr.OData.Api.Abstractions\Mediatr.OData.Api.Abstractions.csproj", "{A0850465-CC20-483F-A85C-9ACCB6737B52}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediatr.OData.Api.Abstractions", "src\Mediatr.OData.Api.Abstractions\Mediatr.OData.Api.Abstractions.csproj", "{2426BC0E-B795-6DB4-121C-241DC8C9036F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,10 +36,10 @@ Global
 		{51D29576-43A6-8FBE-665A-509BB57B5FD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51D29576-43A6-8FBE-665A-509BB57B5FD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51D29576-43A6-8FBE-665A-509BB57B5FD3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A0850465-CC20-483F-A85C-9ACCB6737B52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A0850465-CC20-483F-A85C-9ACCB6737B52}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A0850465-CC20-483F-A85C-9ACCB6737B52}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A0850465-CC20-483F-A85C-9ACCB6737B52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2426BC0E-B795-6DB4-121C-241DC8C9036F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2426BC0E-B795-6DB4-121C-241DC8C9036F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2426BC0E-B795-6DB4-121C-241DC8C9036F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2426BC0E-B795-6DB4-121C-241DC8C9036F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

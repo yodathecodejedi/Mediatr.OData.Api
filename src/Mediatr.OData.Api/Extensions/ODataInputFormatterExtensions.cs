@@ -1,4 +1,4 @@
-﻿using Mediatr.OData.Api.Enumerations;
+﻿using Mediatr.OData.Api.Abstractions.Enumerations;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Formatter;
