@@ -1,5 +1,5 @@
-﻿using Mediatr.OData.Api.Extensions;
-using Mediatr.OData.Api.Interfaces;
+﻿using Mediatr.OData.Api.Abstractions.Interfaces;
+using Mediatr.OData.Api.Extensions;
 using Mediatr.OData.Api.Metadata;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;

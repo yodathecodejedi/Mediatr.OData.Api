@@ -1,5 +1,5 @@
-﻿using Mediatr.OData.Api.Factories;
-using Mediatr.OData.Api.Interfaces;
+﻿using Mediatr.OData.Api.Abstractions.Interfaces;
+using Mediatr.OData.Api.Factories;
 using Mediatr.OData.Api.Models;
 using Mediatr.OData.Api.Providers;
 using Mediatr.OData.Api.Serializers;

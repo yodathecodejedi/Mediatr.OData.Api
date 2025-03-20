@@ -1,4 +1,4 @@
-﻿using Mediatr.OData.Api.Enumerations;
+﻿using Mediatr.OData.Api.Abstractions.Enumerations;
 using System.Collections;
 using System.Reflection;
 

@@ -1,11 +1,12 @@
-﻿using Mediatr.OData.Api.Models;
+﻿using Mediatr.OData.Api.Abstractions.Interfaces;
+using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Mediatr.OData.Api.Extensions;
 
 public static class HttpResultExtensions
 {
-    public static IResult ToODataResults<T>(this Result<T> result)
+    public static IResult ToODataResults<T>(this IMediatrResult<T> result)
     {
         if (result.IsNotSuccess())
         {
@@ -15,7 +16,7 @@ public static class HttpResultExtensions
         return new ODataResults<T> { Data = result.Data };
     }
 
-    public static IResult ToResults(this Result result)
+    public static IResult ToResults(this IMediatrResult result)
     {
         if (result.CustomResult is not null && result.CustomResult is IResult customResult)
         {

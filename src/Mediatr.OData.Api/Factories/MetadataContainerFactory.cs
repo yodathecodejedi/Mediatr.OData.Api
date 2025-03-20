@@ -1,4 +1,4 @@
-﻿using Mediatr.OData.Api.Attributes;
+﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;

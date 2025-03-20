@@ -1,4 +1,4 @@
-﻿using Mediatr.OData.Api.Attributes;
+﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;

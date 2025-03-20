@@ -1,6 +1,6 @@
-﻿using Mediatr.OData.Api.Attributes;
-using Mediatr.OData.Api.Enumerations;
-using Mediatr.OData.Api.Interfaces;
+﻿using Mediatr.OData.Api.Abstractions.Attributes;
+using Mediatr.OData.Api.Abstractions.Enumerations;
+using Mediatr.OData.Api.Abstractions.Interfaces;
 using Mediatr.OData.Api.Metadata;
 using Mediatr.OData.Api.RequestHandlers;
 using Microsoft.AspNetCore.Builder;

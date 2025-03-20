@@ -1,0 +1,86 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Here we set our Assyembly and NugetPackage Version -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <PackageOutputPath>$(SolutionDir)packages\pre-release</PackageOutputPath>
+    <VersionPrefix>1.1.2</VersionPrefix>
+    <PackageVersionSufix>beta</PackageVersionSufix>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PackageOutputPath>$(SolutionDir)packages\release</PackageOutputPath>
+    <VersionPrefix>1.1.2</VersionPrefix>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <InformationalVersion>$(VersionPrefix)$(VersionSuffix)</InformationalVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <InformationalVersion>$(VersionPrefix)$(VersionSuffix)</InformationalVersion>
+  </PropertyGroup>
+  
+  <!-- Here we set the output path for the Nuget Package -->
+  <Target Name="SetNugetOutput" BeforeTargets="Pack">
+    <PropertyGroup>
+      <PackageOutputPath Condition="'$(PackageOutputPath)' == ''">$(OutputPath)</PackageOutputPath>
+    </PropertyGroup>
+  </Target>
+  
+  <!-- Here we set the Nuget Package Id and other metadata -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Mediatr.OData.Api.Abstractions</PackageId>
+    <Authors>TheCodeJedi</Authors>
+    <Description>Mediatr.OData.Api is a lightweight library for creating APIs using, OData, and .NET Minimal APIs. Simplify modern API development with an intuitive and flexible approach.</Description>
+    <PackageTags>API;MinimalAPI;OData;DotNet</PackageTags>
+    <RepositoryUrl></RepositoryUrl>
+    <IsPackable>true</IsPackable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>Mediatr Minimal API's with OData Abstractions</Title>
+    <Copyright>© TheCodeJedi 2025</Copyright>
+    <PackageIcon>Mediatr.OData.Api.Logo.PNG</PackageIcon>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="LICENSE.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="nuget.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.13" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="Mediatr.OData.Api.Logo.PNG">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  
+</Project>
