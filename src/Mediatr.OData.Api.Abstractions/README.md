@@ -4,8 +4,8 @@
 
 It is designed to simplify the development of API's by focusing on clean extensible handlers instead of manually managing HTTP status code and request-response models. It leverages a **Result Pattern** to streamline operation outcomes and take advantage of the latest improvements in **.NET Core 8**.
 
-https://devblogs.microsoft.com/odata/build-formatter-extensions-in-asp-net-core-odata-8-and-hooks-in-odataconnectedservice/
 ---
+
 This package supports the full OData syntax and is extended to also provide data types and ETag attributes.
 
 On top of the OData support, out of the box a documentation and test UI is added out of the box. It looks a lot like the UI for the Microsoft Graph API explorer and even shows implementation examples in the coding language of your choice.

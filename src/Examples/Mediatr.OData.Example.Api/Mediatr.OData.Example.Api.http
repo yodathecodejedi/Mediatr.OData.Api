@@ -1,6 +1,6 @@
 @Mediatr.OData.Example.Api_HostAddress = http://localhost:5154
 
-GET {{Mediatr.OData.Example.Api_HostAddress}}/weatherforecast/
+GET {{Mediatr.OData.Example.Api_HostAddress}}/odata/departments
 Accept: application/json
 
 ###

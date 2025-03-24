@@ -1,0 +1,35 @@
+﻿namespace Mediatr.OData.Example.DomainModel.Company
+{
+    public enum Function
+    {
+        Developer,
+        Tester,
+        Manager,
+        Sales,
+        Marketing,
+        HR,
+        Finance,
+        Legal,
+        Support,
+        Operations,
+        Logistics,
+        Procurement,
+        Production,
+        Quality,
+        Maintenance,
+        Cleaning,
+        Security,
+        Intern,
+        Trainee,
+        Apprentice,
+        Temp,
+        Freelancer,
+        Consultant,
+        Contractor,
+        Partner,
+        Customer,
+        Supplier,
+        Competitor,
+        Other
+    }
+}
