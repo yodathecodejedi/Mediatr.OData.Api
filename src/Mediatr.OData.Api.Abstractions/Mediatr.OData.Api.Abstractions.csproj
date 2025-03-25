@@ -2,14 +2,14 @@
   <!-- Here we set our Assyembly and NugetPackage Version -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <PackageOutputPath>$(SolutionDir)packages\pre-release</PackageOutputPath>
-    <VersionPrefix>1.1.3</VersionPrefix>
+    <VersionPrefix>1.1.4</VersionPrefix>
     <PackageVersionSuffix>beta</PackageVersionSuffix>
     <PackageVersion>$(VersionPrefix)-$(PackageVersionSuffix)</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PackageOutputPath>$(SolutionDir)packages\release</PackageOutputPath>
-    <VersionPrefix>1.1.3</VersionPrefix>
+    <VersionPrefix>1.1.4</VersionPrefix>
     <PackageVersion>$(VersionPrefix)</PackageVersion>
   </PropertyGroup>
 

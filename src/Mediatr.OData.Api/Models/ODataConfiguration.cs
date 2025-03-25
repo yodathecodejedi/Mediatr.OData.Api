@@ -10,9 +10,3 @@ public class ODataConfiguration
     public int PageSize { get; set; } = Constants.OData.DefaultPageSize;
     public bool UseHttpsRedirection { get; set; } = true;
 }
-
-public class TypeDefinition
-{
-    public string Root { get; set; } = default!;
-    public string FirstSegment { get; set; } = default!;
-}
