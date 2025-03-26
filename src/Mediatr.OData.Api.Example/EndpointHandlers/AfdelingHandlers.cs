@@ -18,20 +18,43 @@ public class AfdelingHandlers
 {
     public static string AfdelingQuery(bool withKey = false)
     {
+        //string sql = @"
+        //    SELECT
+        //        a.Sleutel,
+        //        a.Name,
+        //        a.Description,
+        //        a.Sleutel AS AfdelingId,
+        //        m.AfdelingId,                    
+        //        m.Id,
+        //        m.Name,
+        //        m.Description
+        //    FROM Medewerkers m
+        //    LEFT JOIN Afdeling a
+        //    ON m.AfdelingId = a.Sleutel
+        //    ";
         string sql = @"
-            SELECT
-                a.Sleutel,
-                a.Name,
-                a.Description,
-                a.Sleutel AS AfdelingId,
-                m.AfdelingId,                    
-                m.Id,
-                m.Name,
-                m.Description
-            FROM Medewerkers m
-            LEFT JOIN Afdeling a
+            SELECT 
+                a.[Sleutel]
+                ,a.[Name]
+                ,a.[Description]
+                ,a.[BedrijfId]
+                ,AfdelingId = a.[Sleutel]
+                ,m.AfdelingId
+                ,m.AfdelingId
+                ,m.Id
+                ,m.Description
+                ,m.Name
+                ,a.BedrijfId
+                ,BedrijfId = b.Id
+                ,b.Id
+                ,b.Name
+                ,b.Description
+            FROM [Examples].[dbo].[Afdeling] a
+            LEFT JOIN [Examples].[dbo].Medewerkers m
             ON m.AfdelingId = a.Sleutel
-            ";
+            LEFT JOIN [Examples].[dbo].Bedrijf b
+            ON b.Id = a.BedrijfId
+        ";
         if (withKey)
         {
             sql += "WHERE a.Sleutel = @key";
@@ -69,25 +92,49 @@ public class AfdelingHandlers
     {
         try
         {
+            //connection.Open();
+            //var afdelingenDictionary = new Dictionary<int, Afdeling>();
+            //var afdelingen = await connection.QueryAsync<Afdeling, Medewerker, Afdeling>(
+            //    AfdelingQuery(),
+            //    (afdeling, medewerker) =>
+            //    {
+            //        if (!afdelingenDictionary.TryGetValue(afdeling.Sleutel, out var currentAfdeling))
+            //        {
+            //            currentAfdeling = afdeling;
+            //            afdelingenDictionary.Add(currentAfdeling.Sleutel, currentAfdeling);
+            //        }
+
+            //        currentAfdeling.Medewerkers?.Add(medewerker);
+            //        return currentAfdeling;
+            //    },
+            //    splitOn: "AfdelingId"
+            //);
+
+            //return afdelingen.Distinct().AsQueryable();
+
             connection.Open();
-            var afdelingenDictionary = new Dictionary<int, Afdeling>();
-            var afdelingen = await connection.QueryAsync<Afdeling, Medewerker, Afdeling>(
+            var populatedModel = new Dictionary<int, Afdeling>();
+
+            var query = await connection.QueryAsync<Afdeling, Medewerker, Bedrijf, Afdeling>(
                 AfdelingQuery(),
-                (afdeling, medewerker) =>
+                (afdeling, medewerker, bedrijf) =>
                 {
-                    if (!afdelingenDictionary.TryGetValue(afdeling.Sleutel, out var currentAfdeling))
+                    if (!populatedModel.TryGetValue(afdeling.Sleutel, out var currentAfdeling))
                     {
                         currentAfdeling = afdeling;
-                        afdelingenDictionary.Add(currentAfdeling.Sleutel, currentAfdeling);
+                        populatedModel.Add(currentAfdeling.Sleutel, currentAfdeling);
                     }
-
+                    //Medewerkers
                     currentAfdeling.Medewerkers?.Add(medewerker);
+                    //Bedrijf
+                    currentAfdeling.Bedrijf = bedrijf;
                     return currentAfdeling;
                 },
-                splitOn: "AfdelingId"
+                splitOn: "AfdelingId,BedrijfId"
             );
 
-            return afdelingen.Distinct().AsQueryable();
+            return populatedModel.Values.AsQueryable();
+            //return query.Distinct().AsQueryable();
         }
         catch
         {
