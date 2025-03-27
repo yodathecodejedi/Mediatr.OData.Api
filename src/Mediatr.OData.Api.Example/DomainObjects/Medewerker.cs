@@ -11,6 +11,10 @@ public class Medewerker : IDomainObject<int>
     public string Hash { get; set; } = Guid.NewGuid().ToString();
 
     public string Name { get; set; } = default!;
+
     public string Description { get; set; } = default!;
+    [PropertyInternal]
+    public int AfdelingId { get; set; }
+
     public Afdeling? Afdeling { get; set; } = default!;
 }

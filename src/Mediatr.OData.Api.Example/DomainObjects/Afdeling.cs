@@ -72,8 +72,10 @@ public class Afdeling : IDomainObject<int>
     //public Medewerker[]? Medewerkers { get; set; } = [];
 
     //public List<Medewerker>? Medewerkers { get; set; }
+    [PropertyInternal]
+    public int? BedrijfId { get; set; }
 
-    public Bedrijf? Bedrijf { get; set; } = default!;
+    public virtual Bedrijf? Bedrijf { get; set; } = default!;
 
     public virtual ICollection<Medewerker>? Medewerkers { get; set; } = [];
 }

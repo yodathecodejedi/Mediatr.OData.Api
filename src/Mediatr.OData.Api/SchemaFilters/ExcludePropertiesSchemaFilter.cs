@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
-namespace CFW.ODataCore.SchemaFilters;
+namespace Mediatr.OData.Api.SchemaFilters;
 
 public class ExcludePropertiesSchemaFilter : ISchemaFilter
 {

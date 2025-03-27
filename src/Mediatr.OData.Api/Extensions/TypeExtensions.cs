@@ -1,4 +1,5 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
+using Mediatr.OData.Api.Abstractions.Enumerations;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
@@ -6,6 +7,37 @@ namespace Mediatr.OData.Api.Extensions;
 
 public static class TypeExtensions
 {
+    public static bool TryGetReferenceProperties(this Type? type, out Dictionary<string, PropertyCategory> navigationProperties)
+    {
+        navigationProperties = default!;
+        if (type is null)
+            return false;
+
+        try
+        {
+            Dictionary<string, PropertyCategory> intermediateProperties = [];
+            var properties = type.GetProperties();
+            foreach (var property in properties)
+            {
+                property.TryGetPropertyCategory(out PropertyCategory propertyCategory);
+                if (propertyCategory != default! && propertyCategory == PropertyCategory.Navigation || propertyCategory == PropertyCategory.Object)
+                {
+                    intermediateProperties.Add(property.Name.ToLower(), propertyCategory);
+                }
+            }
+            if (intermediateProperties.Count > 0)
+            {
+                navigationProperties = intermediateProperties;
+                return true;
+            }
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public static bool TryGetKeyProperty(this Type? type, out PropertyInfo propertyInfo)
     {
         propertyInfo = default!;

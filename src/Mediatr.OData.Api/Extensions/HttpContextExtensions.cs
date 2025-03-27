@@ -1,10 +1,7 @@
 ﻿using Mediatr.OData.Api.Metadata;
 using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Abstracts;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -15,7 +12,6 @@ namespace Mediatr.OData.Api.Extensions
         public static IODataFeature AddODataFeature(this HttpContext httpContext)
         {
             var container = (httpContext.GetEndpoint()?.Metadata.OfType<ODataMetadataContainer>().SingleOrDefault()) ?? throw new InvalidOperationException("ODataMetadataContainer not found");
-            var odataOptions = httpContext.RequestServices.GetRequiredService<IOptions<ODataOptions>>().Value;
 
             var entityName = httpContext.GetEndpoint()?.Metadata.OfType<EndpointMetadata>().SingleOrDefault()?.Route ?? throw new InvalidOperationException("Route not found");
 

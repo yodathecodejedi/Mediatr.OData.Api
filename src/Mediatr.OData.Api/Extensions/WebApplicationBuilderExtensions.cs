@@ -1,5 +1,4 @@
-﻿using CFW.ODataCore.SchemaFilters;
-using Mediatr.OData.Api.Factories;
+﻿using Mediatr.OData.Api.Factories;
 using Mediatr.OData.Api.Models;
 using Mediatr.OData.Api.SchemaFilters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 
 
 namespace Mediatr.OData.Api.Example.DomainObjects;
-
 public class Bedrijf : IDomainObject<int>
 {
     [Key]

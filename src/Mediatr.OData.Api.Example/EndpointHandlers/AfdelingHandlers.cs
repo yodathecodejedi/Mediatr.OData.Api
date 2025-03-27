@@ -18,20 +18,6 @@ public class AfdelingHandlers
 {
     public static string AfdelingQuery(bool withKey = false)
     {
-        //string sql = @"
-        //    SELECT
-        //        a.Sleutel,
-        //        a.Name,
-        //        a.Description,
-        //        a.Sleutel AS AfdelingId,
-        //        m.AfdelingId,                    
-        //        m.Id,
-        //        m.Name,
-        //        m.Description
-        //    FROM Medewerkers m
-        //    LEFT JOIN Afdeling a
-        //    ON m.AfdelingId = a.Sleutel
-        //    ";
         string sql = @"
             SELECT 
                 a.[Sleutel]
@@ -92,49 +78,32 @@ public class AfdelingHandlers
     {
         try
         {
-            //connection.Open();
-            //var afdelingenDictionary = new Dictionary<int, Afdeling>();
-            //var afdelingen = await connection.QueryAsync<Afdeling, Medewerker, Afdeling>(
-            //    AfdelingQuery(),
-            //    (afdeling, medewerker) =>
-            //    {
-            //        if (!afdelingenDictionary.TryGetValue(afdeling.Sleutel, out var currentAfdeling))
-            //        {
-            //            currentAfdeling = afdeling;
-            //            afdelingenDictionary.Add(currentAfdeling.Sleutel, currentAfdeling);
-            //        }
-
-            //        currentAfdeling.Medewerkers?.Add(medewerker);
-            //        return currentAfdeling;
-            //    },
-            //    splitOn: "AfdelingId"
-            //);
-
-            //return afdelingen.Distinct().AsQueryable();
-
+            var startime = DateTime.Now.Ticks;
             connection.Open();
-            var populatedModel = new Dictionary<int, Afdeling>();
+            IQueryable<Afdeling> afdelingen;
 
-            var query = await connection.QueryAsync<Afdeling, Medewerker, Bedrijf, Afdeling>(
-                AfdelingQuery(),
-                (afdeling, medewerker, bedrijf) =>
+            string sql = @"
+                SELECT * FROM [Afdeling];
+                SELECT * FROM [Medewerkers];
+                SELECT * FROM [Bedrijf];
+            ";
+            using (var multi = await connection.QueryMultipleAsync(sql))
+            {
+                afdelingen = multi.Read<Afdeling>().AsQueryable();
+                var medewerkers = multi.Read<Medewerker>();
+                var bedrijven = multi.Read<Bedrijf>();
+                foreach (var afdeling in afdelingen)
                 {
-                    if (!populatedModel.TryGetValue(afdeling.Sleutel, out var currentAfdeling))
-                    {
-                        currentAfdeling = afdeling;
-                        populatedModel.Add(currentAfdeling.Sleutel, currentAfdeling);
-                    }
-                    //Medewerkers
-                    currentAfdeling.Medewerkers?.Add(medewerker);
-                    //Bedrijf
-                    currentAfdeling.Bedrijf = bedrijf;
-                    return currentAfdeling;
-                },
-                splitOn: "AfdelingId,BedrijfId"
-            );
+                    afdeling.Medewerkers = [.. medewerkers.Where(m => m.AfdelingId == afdeling.Sleutel)];
+                    afdeling.Bedrijf = bedrijven.FirstOrDefault(b => b.Id == afdeling.BedrijfId);
+                }
+            }
 
-            return populatedModel.Values.AsQueryable();
-            //return query.Distinct().AsQueryable();
+            var endtime = DateTime.Now.Ticks;
+            var timespan = endtime - startime;
+            var elapsed = new TimeSpan(timespan);
+            Console.WriteLine($"Time elapsed: {elapsed.TotalMilliseconds}");
+            return afdelingen;
         }
         catch
         {
@@ -164,7 +133,7 @@ public class AfdelingHandlers
                         afdelingenDictionary.Add(currentAfdeling.Sleutel, currentAfdeling);
                     }
 
-                    currentAfdeling.Medewerkers?.Add(medewerker);
+                    //currentAfdeling.Medewerkers?.Add(medewerker);
                     return currentAfdeling;
                 },
                 new { key },
@@ -265,7 +234,6 @@ public class AfdelingHandlers
     {
         public async Task<IMediatrResult<dynamic>> Handle(IODataQueryOptionsWithPageSize<Afdeling> options, CancellationToken cancellationToken)
         {
-
             //Haal mijn data op, op de manier zoals wij dat fijn vinden
             var data = await GetAfdelingenFromDB(connection);
 

@@ -79,12 +79,11 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="1.1.4-beta" />
+    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="1.1.6-beta" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="1.1.4" />
+    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="1.1.6" />
   </ItemGroup>
-
   <ItemGroup>
     <None Update="LICENSE.txt">
       <Pack>True</Pack>

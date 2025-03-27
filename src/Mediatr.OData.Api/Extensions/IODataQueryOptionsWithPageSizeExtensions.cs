@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace Mediatr.OData.Api.Extensions;
 
-public static class ODataQueryOptionsExtensions
+public static class IODataQueryOptionsWithPageSizeExtensions
 {
     public static object? ApplyToGetByKey<T>(this ODataQueryOptions options, IQueryable<T>? data, Func<T, bool> predicate)
     {

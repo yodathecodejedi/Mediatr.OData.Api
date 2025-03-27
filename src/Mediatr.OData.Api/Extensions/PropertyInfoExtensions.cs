@@ -7,39 +7,6 @@ namespace Mediatr.OData.Api.Extensions;
 public static class PropertyInfoExtensions
 {
     #region PropertyCategory
-    public static PropertyCategory GetPropertyCategory(this PropertyInfo propertyInfo)
-    {
-        ArgumentNullException.ThrowIfNull(propertyInfo, nameof(propertyInfo));
-
-        try
-        {
-            var type = propertyInfo.PropertyType;
-            if (type.IsArray) return PropertyCategory.Navigation;
-
-            if (type.IsEnum) return PropertyCategory.Value;
-
-            if (type.IsGenericType)
-            {
-                Type genericType = type.GetGenericTypeDefinition();
-                if (genericType == typeof(List<>) || genericType == typeof(IList<>)) return PropertyCategory.Navigation;
-
-                if (genericType == typeof(ICollection<>) || genericType == typeof(IEnumerable<>)) return PropertyCategory.Navigation;
-            }
-
-            if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string)) return PropertyCategory.Navigation;
-
-            if (type.IsClass && type.Namespace != "System") return PropertyCategory.Object;    // Exclude system types
-
-            if (type.Namespace == "System") return PropertyCategory.Value;    // Exclude system types
-
-            return default!;
-        }
-        catch
-        {
-            return default!;
-        }
-    }
-
     public static bool TryGetPropertyCategory(this PropertyInfo propertyInfo, out PropertyCategory propertyCategory)
     {
         ArgumentNullException.ThrowIfNull(propertyInfo, nameof(propertyInfo));

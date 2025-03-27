@@ -27,7 +27,7 @@ public static class ResourceContextExtensions
         var useFirstSegment = firstSegment != default! && (oDataConfiguration?.TypeDefinition.UseFirstSegment ?? false);
 
         //FirstSegment was not defined in the configuration or not found in the full name
-        if (string.IsNullOrWhiteSpace(firstSegment) || fullName.IndexOf(firstSegment) == -1)
+        if (string.IsNullOrWhiteSpace(firstSegment) || !fullName.Contains(firstSegment, StringComparison.CurrentCulture))
         {
             oDataTypeName = $"{typeRoot}.{typeName}";
             return true;
@@ -35,7 +35,7 @@ public static class ResourceContextExtensions
 
         //Take the substring including first segment or substring after first segment (also taking the additional . into account)
         var segementIndex = useFirstSegment ? fullName.IndexOf(firstSegment) : fullName.IndexOf(firstSegment) + firstSegment.Length + 1;
-        typeName = fullName.Substring(segementIndex);
+        typeName = fullName[segementIndex..];
         oDataTypeName = $"{typeRoot}.{typeName}";
         return true;
     }
