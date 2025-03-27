@@ -80,7 +80,7 @@ public class EndpointMetadata
 
         if (httpMethod == EndpointMethod.Get && keyType is not null && domainObjectType is not null && navigationObjectType is not null)
         {
-            return typeof(IEndpoinGetByNavigationHandler<,,>).MakeGenericType(domainObjectType, keyType, navigationObjectType);
+            return typeof(IEndpointGetByNavigationHandler<,,>).MakeGenericType(domainObjectType, keyType, navigationObjectType);
         }
 
         if (httpMethod == EndpointMethod.Patch && keyType is not null && domainObjectType is not null && navigationObjectType is null)
@@ -116,7 +116,7 @@ public class EndpointMetadata
         }
         if (method == EndpointMethod.Get && TypeKey is not null && NavigationDomainObject is not null)
         {
-            return typeof(IEndpoinGetByNavigationHandler<,,>);
+            return typeof(IEndpointGetByNavigationHandler<,,>);
         }
         if (method == EndpointMethod.Patch && TypeKey is not null && NavigationDomainObject is null)
         {

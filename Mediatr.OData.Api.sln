@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediatr.OData.Example.Domai
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediatr.OData.Example.Api", "src\Examples\Mediatr.OData.Example.Api\Mediatr.OData.Example.Api.csproj", "{8A233617-FDEC-4F30-A8A6-2B0128529E50}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediatr.OData.Exampl.DomainRepository", "src\Examples\Mediatr.OData.Exampl.DomainRepository\Mediatr.OData.Exampl.DomainRepository.csproj", "{ACA59071-DABF-49B3-8400-C77B79855CB3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +54,10 @@ Global
 		{8A233617-FDEC-4F30-A8A6-2B0128529E50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A233617-FDEC-4F30-A8A6-2B0128529E50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A233617-FDEC-4F30-A8A6-2B0128529E50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACA59071-DABF-49B3-8400-C77B79855CB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACA59071-DABF-49B3-8400-C77B79855CB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACA59071-DABF-49B3-8400-C77B79855CB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACA59071-DABF-49B3-8400-C77B79855CB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

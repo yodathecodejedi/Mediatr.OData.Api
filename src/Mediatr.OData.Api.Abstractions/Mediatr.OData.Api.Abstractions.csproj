@@ -2,14 +2,14 @@
   <!-- Here we set our Assyembly and NugetPackage Version -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <PackageOutputPath>$(SolutionDir)packages\pre-release</PackageOutputPath>
-    <VersionPrefix>1.1.6</VersionPrefix>
+    <VersionPrefix>1.2.1</VersionPrefix>
     <PackageVersionSuffix>beta</PackageVersionSuffix>
     <PackageVersion>$(VersionPrefix)-$(PackageVersionSuffix)</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PackageOutputPath>$(SolutionDir)packages\release</PackageOutputPath>
-    <VersionPrefix>1.1.6</VersionPrefix>
+    <VersionPrefix>1.2.1</VersionPrefix>
     <PackageVersion>$(VersionPrefix)</PackageVersion>
   </PropertyGroup>
 
@@ -65,9 +65,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.13" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
   </ItemGroup>
 
   <ItemGroup>

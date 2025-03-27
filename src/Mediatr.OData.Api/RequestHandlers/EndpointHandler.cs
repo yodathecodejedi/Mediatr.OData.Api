@@ -237,7 +237,7 @@ public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(ODat
         if (metadata.HttpMethod == EndpointMethod.Get)
         {
             routeHandlerBuilder = entityGroup.MapGet(route, async (HttpContext httpContext
-                   , [FromServices] IEndpoinGetByNavigationHandler<TDomainObject, TKey, TNavigationObject> handler
+                   , [FromServices] IEndpointGetByNavigationHandler<TDomainObject, TKey, TNavigationObject> handler
                    , [FromQuery] int? PageSize
                    , TKey key
                    , CancellationToken cancellationToken) =>
@@ -256,7 +256,7 @@ public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(ODat
             .Produces<ODataQueryResult<TDomainObject>>();
 
             routeHandlerBuilder = entityGroup.MapGet(routeCount, async (HttpContext httpContext
-               , [FromServices] IEndpoinGetByNavigationHandler<TDomainObject, TKey, TNavigationObject> handler
+               , [FromServices] IEndpointGetByNavigationHandler<TDomainObject, TKey, TNavigationObject> handler
                , [FromQuery] int? PageSize
                , TKey key
                , CancellationToken cancellationToken) =>

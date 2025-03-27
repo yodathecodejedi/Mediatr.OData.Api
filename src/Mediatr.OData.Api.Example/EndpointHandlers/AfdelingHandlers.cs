@@ -387,7 +387,7 @@ public class AfdelingHandlers
 
     #region Navigation Objects
     [Endpoint<Afdeling, int, Medewerker>(EndpointMethod.Get, "medewerkers")]
-    public class GetMedewerkersHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Medewerker>
+    public class GetMedewerkersHandler(IDbConnection connection) : IEndpointGetByNavigationHandler<Afdeling, int, Medewerker>
     {
         public async Task<IMediatrResult<dynamic>> Handle(int key, Type TDomainObject, IODataQueryOptionsWithPageSize<Medewerker> options, CancellationToken cancellationToken)
         {
@@ -397,7 +397,7 @@ public class AfdelingHandlers
     }
 
     [Endpoint<Afdeling, int, Bedrijf>(EndpointMethod.Get, "bedrijf")]
-    public class GetBedrijfHandler(IDbConnection connection) : IEndpoinGetByNavigationHandler<Afdeling, int, Bedrijf>
+    public class GetBedrijfHandler(IDbConnection connection) : IEndpointGetByNavigationHandler<Afdeling, int, Bedrijf>
     {
         public async Task<IMediatrResult<dynamic>> Handle(int key, Type TDomainObject, IODataQueryOptionsWithPageSize<Bedrijf> options, CancellationToken cancellationToken)
         {

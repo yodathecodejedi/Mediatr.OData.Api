@@ -15,7 +15,7 @@ public interface IEndpointGetByKeyHandler<TDomainObject, TKey>
 
 }
 
-public interface IEndpoinGetByNavigationHandler<TDomainObject, TKey, TNavigationObject>
+public interface IEndpointGetByNavigationHandler<TDomainObject, TKey, TNavigationObject>
     where TDomainObject : class, IDomainObject
     where TKey : notnull
     where TNavigationObject : class, IDomainObject
