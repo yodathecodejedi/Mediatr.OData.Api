@@ -9,7 +9,7 @@ using System.Net;
 
 namespace Mediatr.OData.Example.Api.EndpointHandlers
 {
-    [EndpointGroupName("departments")]
+    [EndpointGroup("departments")]
     public class DepartmentHandler(IRepository repository)
     {
         [Endpoint<Department, int>(EndpointMethod.Delete)]
