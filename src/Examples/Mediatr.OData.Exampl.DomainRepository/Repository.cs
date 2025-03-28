@@ -1,4 +1,5 @@
 ﻿using Mediatr.OData.Exampl.DomainRepository.Interfaces;
+using Mediatr.OData.Exampl.DomainRepository.Queries;
 using Mediatr.OData.Example.DomainModel.Company;
 using System.Data;
 
@@ -40,15 +41,26 @@ public class Repository(IDbConnection connection) : IRepository, IDisposable
     }
     #endregion
 
+    public async Task<Department> DepartmentAsync(int Id = default!, bool departmentOnly = false)
+    {
+        if (!TryOpenConnection())
+            return default!;
+
+        var departments = await DepartmentsAsync(Id, departmentOnly);
+
+        TryCloseConnection();
+        return departments.FirstOrDefault() ?? default!;
+    }
+
     public async Task<IQueryable<Department>> DepartmentsAsync(int Id = default!, bool departmentOnly = false)
     {
-        await Task.CompletedTask;
         if (!TryOpenConnection())
             return Enumerable.Empty<Department>().AsQueryable();
 
+        var departments = await DepartmentQueries.PopulateDepartments(connection, Id, departmentOnly);
 
         TryCloseConnection();
-        return default!;
+        return departments;
     }
 
     public async Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false)

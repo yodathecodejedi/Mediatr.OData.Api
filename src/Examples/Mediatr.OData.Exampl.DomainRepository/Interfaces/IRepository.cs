@@ -7,6 +7,7 @@ public interface IRepository
 {
     public ConnectionState State { get; }
 
+    public Task<Department> DepartmentAsync(int Id = default!, bool departmentOnly = false);
     public Task<IQueryable<Department>> DepartmentsAsync(int Id = default!, bool departmentOnly = false);
 
     public Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false);

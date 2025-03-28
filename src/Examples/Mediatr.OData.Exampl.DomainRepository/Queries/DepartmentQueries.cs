@@ -1,4 +1,5 @@
-﻿using Mediatr.OData.Exampl.DomainRepository.Helpers;
+﻿using Dapper;
+using Mediatr.OData.Exampl.DomainRepository.Helpers;
 using Mediatr.OData.Example.DomainModel.Company;
 using System.Data;
 
@@ -6,10 +7,10 @@ namespace Mediatr.OData.Exampl.DomainRepository.Queries;
 
 internal static class DepartmentQueries
 {
-    static IQueryable<Department> PopulateDepartments(IDbConnection connection, int id = default!, bool departmentOnly = false)
+    internal static async Task<IQueryable<Department>> PopulateDepartments(IDbConnection connection, int id = default!, bool departmentOnly = false)
     {
 
-        QueryBuilderHelper queryBuilderHelper = new QueryBuilderHelper();
+        QueryBuilderHelper queryBuilderHelper = new();
         //Departments
         queryBuilderHelper.AddQuery(@"
             SELECT 
@@ -39,9 +40,30 @@ internal static class DepartmentQueries
             if (id != default!) queryBuilderHelper.AddQuery(@"WHERE d.Id = @Id");
         }
         var query = queryBuilderHelper.Build();
-        //Now do our multiple query stuff with Dapper
 
+        try
+        {
+            IQueryable<Department> departments;
+            var result = await connection.QueryMultipleAsync(
+                query,
+                id == default! ? null : new { Id = id });
 
-        return default!;
+            departments = result.Read<Department>().AsQueryable();
+            if (!departmentOnly)
+            {
+                var employees = result.Read<Employee>().AsQueryable();
+                var companies = result.Read<Company>().AsQueryable();
+                foreach (var department in departments)
+                {
+                    department.Employees = [.. employees.Where(e => e.DepartmentId == department.Id)];
+                    department.Company = companies.FirstOrDefault(c => c.Id == department.CompanyId);
+                }
+            }
+            return departments;
+        }
+        catch
+        {
+            return default!;
+        }
     }
 }
