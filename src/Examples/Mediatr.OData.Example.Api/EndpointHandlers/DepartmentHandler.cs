@@ -84,7 +84,7 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
         }
 
         [Endpoint<Department, int, Employee>(EndpointMethod.Get, "employees")]
-        public class GetDepartmentEmployees : IEndpoinGetByNavigationHandler<Department, int, Employee>
+        public class GetDepartmentEmployees : IEndpointGetByNavigationHandler<Department, int, Employee>
         {
             public async Task<IMediatrResult<dynamic>> Handle(int key, Type TDomainObject, IODataQueryOptionsWithPageSize<Employee> options, CancellationToken cancellationToken)
             {
@@ -95,7 +95,7 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
         }
 
         [Endpoint<Department, int, Company>(EndpointMethod.Get, "company")]
-        public class GetDepartmentCompany : IEndpoinGetByNavigationHandler<Department, int, Company>
+        public class GetDepartmentCompany : IEndpointGetByNavigationHandler<Department, int, Company>
         {
             public async Task<IMediatrResult<dynamic>> Handle(int key, Type TDomainObject, IODataQueryOptionsWithPageSize<Company> options, CancellationToken cancellationToken)
             {
