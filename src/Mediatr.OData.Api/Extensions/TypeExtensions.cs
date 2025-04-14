@@ -44,17 +44,39 @@ public static class TypeExtensions
         if (type is null)
             return false;
 
+        //DataAnnotations Key attribute
         propertyInfo = type.GetProperties()
             .SingleOrDefault(x => x.GetCustomAttribute<KeyAttribute>() is not null) ?? default!;
+        //ODataKey Attribute
+        propertyInfo ??= type.GetProperties()
+            .SingleOrDefault(x => x.GetCustomAttribute<ODataKeyAttribute>() is not null) ?? default!;
 
-        propertyInfo ??= type.GetProperty("Id") ?? default!;
+        //Mediatr OData Public Key Attribute
+        propertyInfo ??= type.GetProperties()
+            .SingleOrDefault(x => x.GetCustomAttribute<PublicKeyAttribute>() is not null) ?? default!;
 
-        propertyInfo ??= type.GetProperty(type.Name + "Id") ?? default!;
-
+        //Implicit Key Attribute
         propertyInfo ??= type.GetProperty("Key") ?? default!;
 
+        //Implicit ObjectKey Attribute
         propertyInfo ??= type.GetProperty(type.Name + "Key") ?? default!;
 
+        //Implicit Id Attribute
+        propertyInfo ??= type.GetProperty("Id") ?? default!;
+
+        //Implicit ObjectId Attribute
+        propertyInfo ??= type.GetProperty(type.Name + "Id") ?? default!;
+
+        var internalPropertyNames = type.GetProperties().Where(x =>
+            x.GetCustomAttribute<InternalKeyAttribute>() is not null ||
+            x.GetCustomAttribute<InternalAttribute>() is not null
+            ).Select(p => p.Name).ToList();
+
+        if (propertyInfo is not null && internalPropertyNames.Contains(propertyInfo.Name))
+        {
+            propertyInfo = default!;
+            //Should we throw an exception here so the developer knows that something is wrong in usage ?
+        }
         return (propertyInfo is not null);
     }
 

@@ -10,6 +10,7 @@ public class ChainedResourceSerializer : ODataResourceSerializer
 
     public ChainedResourceSerializer(IODataSerializerProvider serializerProvider) : base(serializerProvider)
     {
+        _serializers.Add(new ODataIgnorePropertiesSerializer());
         _serializers.Add(new ODataETagResourceSerializer());
         _serializers.Add(new ODataTypeResourceSerializer());
         _serializers.Add(new DateTimeOffsetResourceSerializer());
@@ -22,7 +23,8 @@ public class ChainedResourceSerializer : ODataResourceSerializer
     {
         ODataResource oDataResource = base.CreateResource(selectExpandNode, resourceContext);
         List<ODataPropertyInfo> oDataProperties = [.. oDataResource.Properties.Where(p => p is ODataProperty property && property.Value != null)];
-        SerializerResult resourceSerializerResult = new(oDataResource, oDataProperties);
+        var clrType = resourceContext.ResourceInstance.GetType();
+        SerializerResult resourceSerializerResult = new(oDataResource, oDataProperties, clrType);
 
         foreach (var serializer in _serializers)
         {

@@ -10,7 +10,13 @@ public class ExcludePropertiesSchemaFilter : ISchemaFilter
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
         var excludedProperties = context.Type.GetProperties()
-            .Where(p => p.GetCustomAttribute<PropertyInternalAttribute>() != null)
+            .Where(p =>
+                p.Name.Equals("Hash") || p.Name.Equals("ETag") ||
+                p.GetCustomAttribute<InternalAttribute>() != null ||
+                p.GetCustomAttribute<HashAttribute>() != null ||
+                p.GetCustomAttribute<InternalKeyAttribute>() != null ||
+                p.GetCustomAttribute<ODataETagAttribute>() != null
+            )
             .Select(p => p.Name);
 
         var propertiesToRemove = schema.Properties

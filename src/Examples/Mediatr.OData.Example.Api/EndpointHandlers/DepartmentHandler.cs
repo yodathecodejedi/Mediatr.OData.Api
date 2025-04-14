@@ -2,8 +2,8 @@
 using Mediatr.OData.Api.Abstractions.Enumerations;
 using Mediatr.OData.Api.Abstractions.Interfaces;
 using Mediatr.OData.Api.Factories;
-using Mediatr.OData.Exampl.DomainRepository.Interfaces;
 using Mediatr.OData.Example.DomainModel.Company;
+using Mediatr.OData.Example.DomainRepository.Interfaces;
 using Microsoft.AspNetCore.OData.Deltas;
 using System.Net;
 
@@ -12,10 +12,10 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
     [EndpointGroup("departments")]
     public class DepartmentHandler()
     {
-        [Endpoint<Department, int>(EndpointMethod.Delete)]
-        public class DeleteDepartment : IEndpointDeleteHandler<Department, int>
+        [Endpoint<Department, Guid>(EndpointMethod.Delete)]
+        public class DeleteDepartment : IEndpointDeleteHandler<Department, Guid>
         {
-            public async Task<IMediatrResult<dynamic>> Handle(int key, CancellationToken cancellationToken)
+            public async Task<IMediatrResult<dynamic>> Handle(Guid key, CancellationToken cancellationToken)
             {
                 try
                 {
@@ -38,20 +38,20 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
             }
         }
 
-        [Endpoint<Department, int>(EndpointMethod.Get)]
-        public class GetDepartment(IRepository repository) : IEndpointGetByKeyHandler<Department, int>
+        [Endpoint<Department, Guid>(EndpointMethod.Get)]
+        public class GetDepartment(IRepository repository) : IEndpointGetByKeyHandler<Department, Guid>
         {
-            public async Task<IMediatrResult<dynamic>> Handle(int key, IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
+            public async Task<IMediatrResult<dynamic>> Handle(Guid key, IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
             {
                 var result = await repository.DepartmentAsync(key);
                 return options.ApplyODataOptions(result);
             }
         }
 
-        [Endpoint<Department, int>(EndpointMethod.Patch)]
-        public class PatchDepartment : IEndpointPatchHandler<Department, int>
+        [Endpoint<Department, Guid>(EndpointMethod.Patch)]
+        public class PatchDepartment : IEndpointPatchHandler<Department, Guid>
         {
-            public async Task<IMediatrResult<dynamic>> Handle(int key, Delta<Department> domainObjectDelta, IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
+            public async Task<IMediatrResult<dynamic>> Handle(Guid key, Delta<Department> domainObjectDelta, IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
             {
                 await Task.CompletedTask;
                 var result = new Department();
@@ -70,10 +70,10 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
             }
         }
 
-        [Endpoint<Department, int>(EndpointMethod.Put)]
-        public class PutDepartment : IEndpointPutHandler<Department, int>
+        [Endpoint<Department, Guid>(EndpointMethod.Put)]
+        public class PutDepartment : IEndpointPutHandler<Department, Guid>
         {
-            public async Task<IMediatrResult<dynamic>> Handle(int key, Delta<Department> domainObjectDelta, IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
+            public async Task<IMediatrResult<dynamic>> Handle(Guid key, Delta<Department> domainObjectDelta, IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
             {
                 await Task.CompletedTask;
                 var result = new Department();
@@ -81,10 +81,10 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
             }
         }
 
-        [Endpoint<Department, int, Employee>(EndpointMethod.Get, "employees")]
-        public class GetDepartmentEmployees : IEndpointGetByNavigationHandler<Department, int, Employee>
+        [Endpoint<Department, Guid, Employee>(EndpointMethod.Get, "employees")]
+        public class GetDepartmentEmployees : IEndpointGetByNavigationHandler<Department, Guid, Employee>
         {
-            public async Task<IMediatrResult<dynamic>> Handle(int key, Type TDomainObject, IODataQueryOptionsWithPageSize<Employee> options, CancellationToken cancellationToken)
+            public async Task<IMediatrResult<dynamic>> Handle(Guid key, Type TDomainObject, IODataQueryOptionsWithPageSize<Employee> options, CancellationToken cancellationToken)
             {
                 await Task.CompletedTask;
                 var result = Enumerable.Empty<Employee>().AsQueryable();
@@ -92,10 +92,10 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
             }
         }
 
-        [Endpoint<Department, int, Company>(EndpointMethod.Get, "company")]
-        public class GetDepartmentCompany : IEndpointGetByNavigationHandler<Department, int, Company>
+        [Endpoint<Department, Guid, Company>(EndpointMethod.Get, "company")]
+        public class GetDepartmentCompany : IEndpointGetByNavigationHandler<Department, Guid, Company>
         {
-            public async Task<IMediatrResult<dynamic>> Handle(int key, Type TDomainObject, IODataQueryOptionsWithPageSize<Company> options, CancellationToken cancellationToken)
+            public async Task<IMediatrResult<dynamic>> Handle(Guid key, Type TDomainObject, IODataQueryOptionsWithPageSize<Company> options, CancellationToken cancellationToken)
             {
                 await Task.CompletedTask;
                 var result = Enumerable.Empty<Employee>().AsQueryable();

@@ -1,6 +1,6 @@
 using Mediatr.OData.Api.Extensions;
-using Mediatr.OData.Exampl.DomainRepository;
-using Mediatr.OData.Exampl.DomainRepository.Interfaces;
+using Mediatr.OData.Example.DomainRepository;
+using Mediatr.OData.Example.DomainRepository.Interfaces;
 using Microsoft.Data.SqlClient;
 using System.Data;
 

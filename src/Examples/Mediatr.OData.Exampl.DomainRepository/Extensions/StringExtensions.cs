@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Mediatr.OData.Exampl.DomainRepository.Extensions;
+namespace Mediatr.OData.Example.DomainRepository.Extensions;
 
 internal static class StringExtensions
 {

@@ -1,4 +1,4 @@
-﻿namespace Mediatr.OData.Exampl.DomainRepository.Enumerations;
+﻿namespace Mediatr.OData.Example.DomainRepository.Enumerations;
 
 internal enum QueryBuilderMethod
 {

@@ -1,6 +1,7 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Abstractions.Enumerations;
 using Mediatr.OData.Api.Extensions;
+using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using System.Reflection;
@@ -16,38 +17,49 @@ public class ODataETagResourceSerializer : ResourceSerializer
         if (resourceContext is null) return;
         if (serializerResult.Count == 0) return;
 
-        PropertyInfo propertyInfo = GetETagPropertyInfo(resourceContext);
-
-        //Hier zouden we nog iets kunnen toevoegen dat we automatisch een ETag maken als er geen Hash veld bestaat
-        //alle velden die in de ETag moeten komen worden dan geconcateneerd
-
-        if (propertyInfo is null) return;
-
-        object value = resourceContext.ResourceInstance.GetPropertyValue(propertyInfo.Name) ?? default!;
-        if (value is not null)
+        IEnumerable<PropertyInfo> propertyInfos = GetETagPropertyInfos(resourceContext);
+        if (propertyInfos is null || !propertyInfos.Any())
         {
-            var eTag = EncodeETag(value.ToString());
-            if (eTag is not null) serializerResult.SetETag(eTag);
+            return;
         }
-        serializerResult.Remove(propertyInfo.Name);
+
+        foreach (PropertyInfo propertyInfo in propertyInfos)
+        {
+            if (propertyInfo is null) continue;
+            object value = resourceContext.ResourceInstance.GetPropertyValue(propertyInfo.Name) ?? default!;
+            if (value is not null)
+            {
+                //Convert the value to the actual ByteArray
+                byte[] byteArray = value as byte[] ?? default!;
+                var eTag = EncodeETag(byteArray);
+                if (eTag is not null) serializerResult.SetETag(eTag);
+            }
+            serializerResult.Remove(propertyInfo.Name);
+        }
     }
 
-    private static PropertyInfo GetETagPropertyInfo(ResourceContext resourceContext)
+    private static IEnumerable<PropertyInfo> GetETagPropertyInfos(ResourceContext resourceContext)
     {
-        return resourceContext.ResourceInstance.GetType().GetProperties().SingleOrDefault(
+        return resourceContext.ResourceInstance.GetType().GetProperties().Where(
             p => p.Name.Equals("Hash") || p.Name.Equals("ETag") ||
             p.GetCustomAttribute<ODataETagAttribute>() is not null ||
-            p.GetCustomAttribute<PropertyHashAttribute>() is not null ||
+            p.GetCustomAttribute<HashAttribute>() is not null ||
             p.GetCustomAttribute<PropertyModeAttribute>()?.Mode == Mode.ETag ||
-            p.GetCustomAttribute<PropertyModeAttribute>()?.Mode == Mode.Hash) ?? default!;
+            p.GetCustomAttribute<PropertyModeAttribute>()?.Mode == Mode.Hash);
     }
 
-    private static string EncodeETag(string? hash)
+    private static string EncodeETag(byte[] byteArray)
     {
-        if (hash is null) return default!;
-        if (hash.Length == 0) return default!;
+        if (byteArray is null) return default!;
+        if (byteArray.Length == 0) return default!;
 
-        byte[] bytes = System.Text.Encoding.UTF8.GetBytes(hash);
-        return Convert.ToBase64String(bytes);
+        //Check the config for the output style
+        var oDataConfiguration = AppContext.GetData("ODataConfiguration") as ODataConfiguration;
+        var encodeBase64 = oDataConfiguration?.Formatting.EncodeETagBase64 ?? false;
+        if (encodeBase64)
+        {
+            return Convert.ToBase64String(byteArray);
+        }
+        return $"0x{BitConverter.ToString(byteArray).Replace("-", "")}";
     }
 }

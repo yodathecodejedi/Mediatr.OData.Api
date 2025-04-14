@@ -9,4 +9,5 @@ public class ODataConfiguration
     public string RoutePrefix { get; set; } = Constants.OData.DefaultRoutePrefix;
     public int PageSize { get; set; } = Constants.OData.DefaultPageSize;
     public bool UseHttpsRedirection { get; set; } = true;
+    public Formatting Formatting { get; set; } = new();
 }

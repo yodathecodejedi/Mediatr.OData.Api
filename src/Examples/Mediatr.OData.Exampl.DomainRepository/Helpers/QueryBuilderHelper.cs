@@ -1,12 +1,12 @@
-﻿using Mediatr.OData.Exampl.DomainRepository.Enumerations;
-using Mediatr.OData.Exampl.DomainRepository.Extensions;
+﻿using Mediatr.OData.Example.DomainRepository.Enumerations;
+using Mediatr.OData.Example.DomainRepository.Extensions;
 using System.Text;
 
-namespace Mediatr.OData.Exampl.DomainRepository.Helpers;
+namespace Mediatr.OData.Example.DomainRepository.Helpers;
 
 internal class QueryBuilderHelper
 {
-    private readonly StringBuilder queryBuilder = new StringBuilder();
+    private readonly StringBuilder queryBuilder = new();
     private QueryBuilderMethod lastMethod = QueryBuilderMethod.None;
     private bool canBuild = false;
     private int queryCount = 0;

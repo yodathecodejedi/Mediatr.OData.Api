@@ -2,6 +2,7 @@
 {
     public enum Function
     {
+        Other,
         Developer,
         Tester,
         Manager,
@@ -29,7 +30,6 @@
         Partner,
         Customer,
         Supplier,
-        Competitor,
-        Other
+        Competitor
     }
 }

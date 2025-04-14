@@ -1,10 +1,10 @@
-﻿using Mediatr.OData.Exampl.DomainRepository.Interfaces;
-using Mediatr.OData.Exampl.DomainRepository.Queries;
-using Mediatr.OData.Example.DomainModel.Company;
+﻿using Mediatr.OData.Example.DomainModel.Company;
+using Mediatr.OData.Example.DomainRepository.Interfaces;
+using Mediatr.OData.Example.DomainRepository.Queries;
 using System.Data;
 
 
-namespace Mediatr.OData.Exampl.DomainRepository;
+namespace Mediatr.OData.Example.DomainRepository;
 
 public class Repository(IDbConnection connection) : IRepository, IDisposable
 {
@@ -41,23 +41,45 @@ public class Repository(IDbConnection connection) : IRepository, IDisposable
     }
     #endregion
 
-    public async Task<Department> DepartmentAsync(int Id = default!, bool departmentOnly = false)
+    //public async Task<Department> DepartmentAsync(int Id = default!, bool departmentOnly = false)
+    //{
+    //    if (!TryOpenConnection())
+    //        return default!;
+
+    //    var departments = await DepartmentsAsync(Id, departmentOnly);
+
+    //    TryCloseConnection();
+    //    return departments.FirstOrDefault() ?? default!;
+    //}
+
+    public async Task<Department> DepartmentAsync(Guid key = default!, bool departmentOnly = false)
     {
         if (!TryOpenConnection())
             return default!;
 
-        var departments = await DepartmentsAsync(Id, departmentOnly);
+        var departments = await DepartmentsAsync(key, departmentOnly);
 
         TryCloseConnection();
         return departments.FirstOrDefault() ?? default!;
     }
 
-    public async Task<IQueryable<Department>> DepartmentsAsync(int Id = default!, bool departmentOnly = false)
+    //public async Task<IQueryable<Department>> DepartmentsAsync(int Id = default!, bool departmentOnly = false)
+    //{
+    //    if (!TryOpenConnection())
+    //        return Enumerable.Empty<Department>().AsQueryable();
+
+    //    var departments = await DepartmentQueries.PopulateDepartments(connection, Id, departmentOnly);
+
+    //    TryCloseConnection();
+    //    return departments;
+    //}
+
+    public async Task<IQueryable<Department>> DepartmentsAsync(Guid key = default!, bool departmentOnly = false)
     {
         if (!TryOpenConnection())
             return Enumerable.Empty<Department>().AsQueryable();
 
-        var departments = await DepartmentQueries.PopulateDepartments(connection, Id, departmentOnly);
+        var departments = await DepartmentQueries.PopulateDepartments(connection, key, departmentOnly);
 
         TryCloseConnection();
         return departments;

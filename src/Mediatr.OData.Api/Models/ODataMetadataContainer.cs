@@ -93,9 +93,9 @@ public class ODataMetadataContainer(string routePrefix)
             var propertiesToBeIgnored = objectProperties.Where(prop =>
                 prop.GetCustomAttributes<PropertyModeAttribute>().Any(t => t.Mode == Mode.ETag || t.Mode == Mode.Hash) ||
                 prop.GetCustomAttributes<JsonIgnoreAttribute>().Any() ||
-                prop.GetCustomAttributes<PropertyHashAttribute>().Any() ||
+                prop.GetCustomAttributes<HashAttribute>().Any() ||
                 prop.GetCustomAttributes<ODataETagAttribute>().Any() ||
-                prop.GetCustomAttributes<PropertyInternalAttribute>().Any()
+                prop.GetCustomAttributes<InternalAttribute>().Any()
             );
 
             foreach (var propertyToBeIgnored in propertiesToBeIgnored)

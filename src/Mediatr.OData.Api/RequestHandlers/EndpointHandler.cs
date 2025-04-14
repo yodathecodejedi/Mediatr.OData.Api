@@ -232,7 +232,7 @@ public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(ODat
         ArgumentNullException.ThrowIfNull(routeSegment, nameof(routeSegment));
 
         route = string.Concat("/{key}/", routeSegment);
-        var routeCount = route.EndsWith("/") ? $"{route}$count" : $"{route}/$count";
+        var routeCount = route.EndsWith('/') ? $"{route}$count" : $"{route}/$count";
         RouteHandlerBuilder? routeHandlerBuilder = null;
         if (metadata.HttpMethod == EndpointMethod.Get)
         {

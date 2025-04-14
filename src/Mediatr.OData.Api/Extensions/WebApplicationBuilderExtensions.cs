@@ -1,5 +1,4 @@
-﻿using Mediatr.OData.Api.Factories;
-using Mediatr.OData.Api.Models;
+﻿using Mediatr.OData.Api.Models;
 using Mediatr.OData.Api.SchemaFilters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -27,7 +26,6 @@ public static class WebApplicationBuilderExtensions
         builder.Services.ConfigureHttpJsonOptions(options =>
         {
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-            options.SerializerOptions.Converters.Add(new IgnoreSpecializedPropertiesPolicy());
             options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull;
         });
 
