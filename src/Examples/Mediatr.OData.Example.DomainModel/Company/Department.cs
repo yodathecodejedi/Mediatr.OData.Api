@@ -1,15 +1,16 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Abstractions.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Mediatr.OData.Example.DomainModel.Company
 {
     public sealed class Department : IDomainObject<Guid>
     {
         //Keys
-        [InternalKey]
+        [Key]
         public int Id { get; set; }
 
-        [PublicKey]
+        [ODataKey]
         public Guid Key { get; set; }
 
         //Fields

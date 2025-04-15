@@ -1,6 +1,7 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Abstractions.Enumerations;
 using Mediatr.OData.Api.Abstractions.Interfaces;
+using Mediatr.OData.Api.Extensions;
 using Mediatr.OData.Api.Metadata;
 using Mediatr.OData.Api.RequestHandlers;
 using Microsoft.AspNetCore.Builder;
@@ -85,18 +86,50 @@ public class ODataMetadataContainer(string routePrefix)
 
         foreach (var (endpointKey, metadata) in _endpointMetadata)
         {
-            var objectProperties = endpointKey.ObjectType.GetProperties();
-            var oDataEntityType = modelBuilder.AddEntityType(endpointKey.ObjectType);
-            var entitySetConfiguration = modelBuilder.AddEntitySet(endpointKey.Route, oDataEntityType);
+            //The ClrObjectType that is used in the ODataModelBuilder
+            Type objectType = endpointKey.ObjectType;
+            //The properties of the ClrOjectType
+            PropertyInfo[] objectProperties = endpointKey.ObjectType.GetProperties();
+            //The TypeConfiguration for the EdmModel
+            EntityTypeConfiguration oDataEntityType = modelBuilder.AddEntityType(endpointKey.ObjectType);
+            //The SetConfiguration for the EdmModel
+            EntitySetConfiguration entitySetConfiguration = modelBuilder.AddEntitySet(endpointKey.Route, oDataEntityType);
+
+            //Find our customKey to add to the oDataEntityType 
+            //TODO: Add support for custom keys
+
+            if (!objectType.TryGetKeyProperty(out var keyProperty) && !oDataEntityType.Keys.Any())
+            {
+                //Missing keyproperty
+                Console.WriteLine($"Not Found");
+            }
+            else
+            {
+                //Found
+                Console.WriteLine(keyProperty.Name);
+            }
+            var keyProperty1 = objectProperties.SingleOrDefault(prop =>
+                prop.GetCustomAttributes<ODataKeyAttribute>().Any()) ?? default!;
+            if (keyProperty1 == default!)
+            {
+                //Missing key property 
+            }
+            oDataEntityType.HasKey(keyProperty1);
 
             //Find the properties that should be ignored on the EDM Model (like the E-tag)
-            var propertiesToBeIgnored = objectProperties.Where(prop =>
+            var propertiesToBeIgnored = objectProperties
+                //Exclude the KeyProperty from the list of properties to be ignored
+                .Where(prop => !prop.Name.Equals(keyProperty.Name))
+                //Select the following Attributes ODataIgnore, ODataETag
+                .Where(prop =>
                 prop.GetCustomAttributes<PropertyModeAttribute>().Any(t => t.Mode == Mode.ETag || t.Mode == Mode.Hash) ||
                 prop.GetCustomAttributes<JsonIgnoreAttribute>().Any() ||
                 prop.GetCustomAttributes<HashAttribute>().Any() ||
                 prop.GetCustomAttributes<ODataETagAttribute>().Any() ||
                 prop.GetCustomAttributes<InternalAttribute>().Any()
             );
+
+
 
             foreach (var propertyToBeIgnored in propertiesToBeIgnored)
             {
