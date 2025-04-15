@@ -7,7 +7,7 @@ namespace Mediatr.OData.Example.DomainModel.Company
     public sealed class Employee : IDomainObject<int>
     {
         //Keys
-        [Internal]
+        [ODataIgnore]
         public int Id { get; set; }
         [Key]
         public Guid Key { get; set; } = default!;
@@ -23,7 +23,7 @@ namespace Mediatr.OData.Example.DomainModel.Company
         public DateTime CreatedAt { get; set; } = default!;
         public DateTime ModifiedAt { get; set; } = default!;
 
-        [Internal]
+        [ODataIgnore]
         public int? DepartmentId { get; set; } = default;
 
         //Navigation

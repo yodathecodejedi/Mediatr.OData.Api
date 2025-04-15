@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Mediatr.OData.Api" Version="3.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Mediatr.OData.Api\Mediatr.OData.Api.csproj" />
     <ProjectReference Include="..\Mediatr.OData.Exampl.DomainRepository\Mediatr.OData.Example.DomainRepository.csproj" />
   </ItemGroup>
 

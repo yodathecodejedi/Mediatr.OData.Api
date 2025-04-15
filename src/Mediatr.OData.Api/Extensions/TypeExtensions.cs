@@ -1,6 +1,6 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Abstractions.Enumerations;
-using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Reflection;
 
 namespace Mediatr.OData.Api.Extensions;
@@ -44,16 +44,9 @@ public static class TypeExtensions
         if (type is null)
             return false;
 
-        //DataAnnotations Key attribute
-        propertyInfo = type.GetProperties()
-            .SingleOrDefault(x => x.GetCustomAttribute<KeyAttribute>() is not null) ?? default!;
         //ODataKey Attribute
-        propertyInfo ??= type.GetProperties()
+        propertyInfo = type.GetProperties()
             .SingleOrDefault(x => x.GetCustomAttribute<ODataKeyAttribute>() is not null) ?? default!;
-
-        //Mediatr OData Public Key Attribute
-        propertyInfo ??= type.GetProperties()
-            .SingleOrDefault(x => x.GetCustomAttribute<PublicKeyAttribute>() is not null) ?? default!;
 
         //Implicit Key Attribute
         propertyInfo ??= type.GetProperty("Key") ?? default!;
@@ -68,14 +61,18 @@ public static class TypeExtensions
         propertyInfo ??= type.GetProperty(type.Name + "Id") ?? default!;
 
         var internalPropertyNames = type.GetProperties().Where(x =>
-            x.GetCustomAttribute<InternalKeyAttribute>() is not null ||
-            x.GetCustomAttribute<InternalAttribute>() is not null
+            x.GetCustomAttribute<ODataIgnoreAttribute>() is not null ||
+            x.GetCustomAttribute<ODataETagAttribute>() is not null
             ).Select(p => p.Name).ToList();
 
         if (propertyInfo is not null && internalPropertyNames.Contains(propertyInfo.Name))
         {
             propertyInfo = default!;
-            //Should we throw an exception here so the developer knows that something is wrong in usage ?
+            throw new MissingPrimaryKeyException($"The property {propertyInfo.Name} of the DomainObject {type.Name} is marked as ODataIgnore or ODataETag, but is used as a key property. Please remove the ODataIgnore or ODataETag attribute from the property or add the ODataKey attribute to the property.");
+        }
+        if (propertyInfo is null)
+        {
+            throw new MissingPrimaryKeyException($"The DomainObject {type.Name} does not have a key property. Please add the ODataKey attribute to the property that contains the key of the DomainObject.");
         }
         return (propertyInfo is not null);
     }

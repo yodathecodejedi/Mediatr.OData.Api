@@ -35,19 +35,21 @@ public class EndpointMetadata
         endpointAttribute.TryGetNavigationObjectType(out var navigationObjectType);
 
         var implementationInterface = TryGetImplementationInterface(httpMethod, keyType, navigationObjectType);
-        var endpointAuthorizeAttribute = targetType.GetCustomAttribute<EndpointAuthorizeAttribute>() ?? default!;
-        var domainObjectAuthorizeAttribute = domainObjectType.GetCustomAttribute<ObjectAuthorizeAttribute>() ?? default!;
+        var endpointAuthorizeAttribute = targetType.GetCustomAttribute<ODataAuthorizeAttribute>() ?? default!;
+        var domainObjectAuthorizeAttribute = domainObjectType.GetCustomAttribute<ODataAuthorizeAttribute>() ?? default!;
         IAuthorizeData authorizeData = (IAuthorizeData)endpointAuthorizeAttribute ?? (IAuthorizeData)domainObjectAuthorizeAttribute ?? default!;
 
         if (string.IsNullOrEmpty(route) && string.IsNullOrEmpty(groupRoute))
             throw new MissingMemberException($"The endpoint route/grouping is not declared in {targetType.FullName} or its parent. Please use EndpointAttribute on {targetType.FullName} or EndpointGroupAttribute on its parent.");
 
         var serviceType = TryGetServiceType(httpMethod, domainObjectType, keyType, navigationObjectType);
+        if (serviceType == default!)
+            throw new MissingMemberException($"The serviceType for {domainObjectType.Name} and httpMethod {httpMethod} is not found, your endpointhandler is malformatted.");
         var serviceDescriptor = new ServiceDescriptor(serviceType, targetType, ServiceLifetime.Transient) ?? default!;
 
         return new EndpointMetadata
         {
-            AuthorizeData = endpointAuthorizeAttribute != default! ? authorizeData : default!,
+            AuthorizeData = authorizeData ?? default!,
             Binding = binding,
             DomainObjectType = domainObjectType,
             HandlerType = implementationInterface,

@@ -1,6 +1,6 @@
 ﻿namespace Mediatr.OData.Api.Abstractions.Attributes
 {
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public sealed class EndpointGroupAttribute : Attribute
     {
         public string Route { get; set; } = string.Empty;

@@ -2,8 +2,8 @@
 
 namespace Mediatr.OData.Api.Abstractions.Attributes;
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-public sealed class ObjectAuthorizeAttribute : AuthorizeAttribute
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = false)]
+public sealed class ODataAuthorizeAttribute : AuthorizeAttribute
 {
     public string[] Scopes { get; set; } = [];
 

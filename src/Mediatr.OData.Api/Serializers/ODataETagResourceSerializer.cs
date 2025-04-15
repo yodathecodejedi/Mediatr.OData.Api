@@ -1,5 +1,4 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
-using Mediatr.OData.Api.Abstractions.Enumerations;
 using Mediatr.OData.Api.Extensions;
 using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.OData.Formatter;
@@ -41,11 +40,10 @@ public class ODataETagResourceSerializer : ResourceSerializer
     private static IEnumerable<PropertyInfo> GetETagPropertyInfos(ResourceContext resourceContext)
     {
         return resourceContext.ResourceInstance.GetType().GetProperties().Where(
+            //Based on the implicit name of the property ETag or Hash
             p => p.Name.Equals("Hash") || p.Name.Equals("ETag") ||
-            p.GetCustomAttribute<ODataETagAttribute>() is not null ||
-            p.GetCustomAttribute<HashAttribute>() is not null ||
-            p.GetCustomAttribute<PropertyModeAttribute>()?.Mode == Mode.ETag ||
-            p.GetCustomAttribute<PropertyModeAttribute>()?.Mode == Mode.Hash);
+            //Based on the attributes
+            p.GetCustomAttribute<ODataETagAttribute>() is not null);
     }
 
     private static string EncodeETag(byte[] byteArray)

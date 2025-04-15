@@ -1,5 +1,4 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
-using Mediatr.OData.Api.Abstractions.Enumerations;
 using Mediatr.OData.Api.Abstractions.Interfaces;
 using Mediatr.OData.Api.Extensions;
 using Mediatr.OData.Api.Metadata;
@@ -12,7 +11,6 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using System.Data;
 using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace Mediatr.OData.Api.Models;
 
@@ -95,41 +93,21 @@ public class ODataMetadataContainer(string routePrefix)
             //The SetConfiguration for the EdmModel
             EntitySetConfiguration entitySetConfiguration = modelBuilder.AddEntitySet(endpointKey.Route, oDataEntityType);
 
-            //Find our customKey to add to the oDataEntityType 
-            //TODO: Add support for custom keys
-
             if (!objectType.TryGetKeyProperty(out var keyProperty) && !oDataEntityType.Keys.Any())
             {
                 //Missing keyproperty
-                Console.WriteLine($"Not Found");
+                throw new MissingPrimaryKeyException($"The key property is not declared in {objectType.FullName}. Please use ODataKeyAttribute on the key property.");
             }
-            else
-            {
-                //Found
-                Console.WriteLine(keyProperty.Name);
-            }
-            var keyProperty1 = objectProperties.SingleOrDefault(prop =>
-                prop.GetCustomAttributes<ODataKeyAttribute>().Any()) ?? default!;
-            if (keyProperty1 == default!)
-            {
-                //Missing key property 
-            }
-            oDataEntityType.HasKey(keyProperty1);
+            oDataEntityType.HasKey(keyProperty);
 
-            //Find the properties that should be ignored on the EDM Model (like the E-tag)
+            //Get the properties we need to exclude from the EDM model (e.g. ODataIgnore, ODataETag) 
             var propertiesToBeIgnored = objectProperties
-                //Exclude the KeyProperty from the list of properties to be ignored
+                //Exclude the KeyProperty from the list of properties to be ignored just in case it was an Implicit Key 
                 .Where(prop => !prop.Name.Equals(keyProperty.Name))
                 //Select the following Attributes ODataIgnore, ODataETag
                 .Where(prop =>
-                prop.GetCustomAttributes<PropertyModeAttribute>().Any(t => t.Mode == Mode.ETag || t.Mode == Mode.Hash) ||
-                prop.GetCustomAttributes<JsonIgnoreAttribute>().Any() ||
-                prop.GetCustomAttributes<HashAttribute>().Any() ||
-                prop.GetCustomAttributes<ODataETagAttribute>().Any() ||
-                prop.GetCustomAttributes<InternalAttribute>().Any()
-            );
-
-
+                    prop.GetCustomAttributes<ODataETagAttribute>().Any() ||
+                    prop.GetCustomAttributes<ODataIgnoreAttribute>().Any());
 
             foreach (var propertyToBeIgnored in propertiesToBeIgnored)
             {
@@ -137,6 +115,7 @@ public class ODataMetadataContainer(string routePrefix)
                 entitySetConfiguration.EntityType.RemoveProperty(propertyToBeIgnored);
             }
 
+            //Add the enumaration properties to the EDM model
             var enumProperties = objectProperties
                 .Where(x => x.PropertyType.IsEnum)
                 .ToList();
@@ -145,8 +124,9 @@ public class ODataMetadataContainer(string routePrefix)
                 modelBuilder.AddEnumType(property.PropertyType);
             }
         }
-
+        //Build the mopdel
         _edmModel = modelBuilder.GetEdmModel();
+        //Mark it is immutable so it can be used in the OData route
         _edmModel.MarkAsImmutable();
     }
 

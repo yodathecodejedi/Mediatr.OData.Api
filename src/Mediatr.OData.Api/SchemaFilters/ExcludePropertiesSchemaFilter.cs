@@ -9,12 +9,13 @@ public class ExcludePropertiesSchemaFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
+        //Exclude properties that are not relevant for the OData API Model
         var excludedProperties = context.Type.GetProperties()
             .Where(p =>
+                //Based on the implicit name of the property ETag or Hash
                 p.Name.Equals("Hash") || p.Name.Equals("ETag") ||
-                p.GetCustomAttribute<InternalAttribute>() != null ||
-                p.GetCustomAttribute<HashAttribute>() != null ||
-                p.GetCustomAttribute<InternalKeyAttribute>() != null ||
+                //Based on the attributes
+                p.GetCustomAttribute<ODataIgnoreAttribute>() != null ||
                 p.GetCustomAttribute<ODataETagAttribute>() != null
             )
             .Select(p => p.Name);

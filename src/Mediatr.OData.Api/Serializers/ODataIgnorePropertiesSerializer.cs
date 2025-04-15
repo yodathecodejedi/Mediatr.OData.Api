@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace Mediatr.OData.Api.Serializers;
 
@@ -15,7 +14,7 @@ public class ODataIgnorePropertiesSerializer : ResourceSerializer
         if (resourceContext is null) return;
         if (serializerResult.Count == 0) return;
 
-        IEnumerable<PropertyInfo> propertyInfos = GetInternalPropertyInfos(resourceContext);
+        IEnumerable<PropertyInfo> propertyInfos = GetODataIgnoreProperties(resourceContext);
 
         if (propertyInfos is null) return;
         if (!propertyInfos.Any()) return;
@@ -25,11 +24,9 @@ public class ODataIgnorePropertiesSerializer : ResourceSerializer
         }
     }
 
-    private static IEnumerable<PropertyInfo> GetInternalPropertyInfos(ResourceContext resourceContext)
+    private static IEnumerable<PropertyInfo> GetODataIgnoreProperties(ResourceContext resourceContext)
     {
         return resourceContext.ResourceInstance.GetType().GetProperties().Where(p =>
-            p.GetCustomAttribute<InternalAttribute>() is not null ||
-            p.GetCustomAttribute<InternalKeyAttribute>() is not null ||
-            p.GetCustomAttribute<JsonIgnoreAttribute>() is not null);
+            p.GetCustomAttribute<ODataIgnoreAttribute>() is not null);
     }
 }
