@@ -12,6 +12,7 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
     [EndpointGroup("departments")]
     public class DepartmentHandler()
     {
+
         [Endpoint<Department, Guid>(EndpointMethod.Delete)]
         public class DeleteDepartment : IEndpointDeleteHandler<Department, Guid>
         {

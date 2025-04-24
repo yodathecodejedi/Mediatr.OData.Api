@@ -2,7 +2,7 @@
   <!-- Here we set our Assyembly and NugetPackage Version -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <PackageOutputPath>$(SolutionDir)packages\pre-release</PackageOutputPath>
-    <VersionPrefix>3.0.0</VersionPrefix>
+    <VersionPrefix>3.0.1</VersionPrefix>
     <PackageVersionSuffix>beta</PackageVersionSuffix>
     <PackageVersion>$(VersionPrefix)-$(PackageVersionSuffix)</PackageVersion>
     <DebugType>portable</DebugType>
@@ -11,7 +11,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PackageOutputPath>$(SolutionDir)packages\release</PackageOutputPath>
-    <VersionPrefix>3.0.0</VersionPrefix>
+    <VersionPrefix>3.0.1</VersionPrefix>
     <PackageVersion>$(VersionPrefix)</PackageVersion>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -44,7 +44,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Mediatr.OData.Api.Abstractions</PackageId>
     <Authors>TheCodeJedi</Authors>
-    <Description>Mediatr.OData.Api is a lightweight library for creating APIs using, OData, and .NET Minimal APIs. Simplify modern API development with an intuitive and flexible approach.</Description>
+    <Description>Mediatr.OData.Api.Abstractions is the abstraction layer for the Mediatr.OData.Api nuget package, Mediatr.OData.Api is a lightweight library for creating APIs using, OData, and .NET Minimal APIs. Simplify modern API development with an intuitive and flexible approach.</Description>
     <PackageTags>API;MinimalAPI;OData;DotNet</PackageTags>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

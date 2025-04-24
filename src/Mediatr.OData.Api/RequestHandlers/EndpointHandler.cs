@@ -45,7 +45,7 @@ public sealed class EndpointHandler<TDomainObject>(ODataMetadataContainer contai
             //.WithSummary($"Endpoint Get Summary")
             //.WithDisplayName($"endpoint Get DisplayName  {metadata.Name}")
             //.WithDescription("Endpoint get Description")
-            .Produces<ODataQueryResult<TDomainObject>>();
+            .Produces<ODataQueryResults<TDomainObject>>();
 
 
             routeHandlerBuilder = entityGroup.MapGet(routeCount, async (HttpContext httpContext
@@ -63,7 +63,7 @@ public sealed class EndpointHandler<TDomainObject>(ODataMetadataContainer contai
             //.WithSummary($"Endpoint Get Summary")
             //.WithDisplayName($"endpoint Get DisplayName  {metadata.Name}")
             //.WithDescription("Endpoint get Description")
-            .Produces<ODataQueryResult<TDomainObject>>();
+            .Produces<ODataQueryResults<TDomainObject>>();
         }
 
         if (metadata.HttpMethod == EndpointMethod.Post)
@@ -87,7 +87,7 @@ public sealed class EndpointHandler<TDomainObject>(ODataMetadataContainer contai
             //.WithSummary($"Endpoint Get Summary")
             //.WithDisplayName($"endpoint Get DisplayName  {metadata.Name}")
             //.WithDescription("Endpoint get Description")
-            .Produces<ODataQueryResult<TDomainObject>>();
+            .Produces<ODataQueryResults<TDomainObject>>();
 
         }
 
@@ -253,7 +253,7 @@ public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(ODat
             //.WithSummary($"Endpoint Get Summary")
             //.WithDisplayName($"endpoint Get DisplayName  {metadata.Name}")
             //.WithDescription("Endpoint get Description")
-            .Produces<ODataQueryResult<TDomainObject>>();
+            .Produces<ODataQueryResults<TNavigationObject>>();
 
             routeHandlerBuilder = entityGroup.MapGet(routeCount, async (HttpContext httpContext
                , [FromServices] IEndpointGetByNavigationHandler<TDomainObject, TKey, TNavigationObject> handler

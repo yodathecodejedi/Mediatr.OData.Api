@@ -1,9 +1,10 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Abstractions.Interfaces;
+using Mediatr.OData.Api.Abstractions.Models;
 
 namespace Mediatr.OData.Example.DomainModel.Company
 {
-    public sealed class Department : IDomainObject<Guid>
+    public sealed class Department : DomainObject, IDomainObject<Guid>
     {
         //Keys
         [ODataIgnore]
