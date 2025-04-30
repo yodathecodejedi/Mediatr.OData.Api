@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.OData.Query;
 using System.Net;
 
 namespace Mediatr.OData.Api.Models;
-
+//TODO => COunt dynamic object with Fieldname Count and Value int
+//In applyto this is a Value Object Let's see what comes from this for now we will set it to obect ?
 public class ODataQueryOptionsWithPageSize<TDomainObject>(
     ODataQueryContext context,
     HttpRequest request
