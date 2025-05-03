@@ -1,6 +1,7 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Abstractions.Enumerations;
 using Mediatr.OData.Api.Abstractions.Interfaces;
+using Mediatr.OData.Api.Abstractions.Models;
 using Mediatr.OData.Api.Factories;
 using Mediatr.OData.Example.DomainModel.Company;
 using Mediatr.OData.Example.DomainRepository.Interfaces;
@@ -65,6 +66,10 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
         {
             public async Task<IMediatrResult<dynamic>> Handle(Delta<Department> domainObjectDelta, IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
             {
+                //var x = domainObjectDelta.GetChangedPropertyNames();
+                //var y = domainObjectDelta.GetInstance();
+                //var Z = domainObjectDelta.GetDeltaNestedNavigationProperties();
+
                 await Task.CompletedTask;
                 var result = new Department();
                 return options.ApplyODataOptions(result);
@@ -82,25 +87,41 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
             }
         }
 
-        [Endpoint<Department, Guid, Employee>(EndpointMethod.Get, "employees")]
-        public class GetDepartmentEmployees : IEndpointGetByNavigationHandler<Department, Guid, Employee>
+        [Endpoint<Department, Guid, Employee>(EndpointMethod.Get)]
+        public class GetDepartmentEmployees(IRepository repository) : IEndpointGetByNavigationHandler<Department, Guid, Employee>
         {
             public async Task<IMediatrResult<dynamic>> Handle(Guid key, Type TDomainObject, IODataQueryOptionsWithPageSize<Employee> options, CancellationToken cancellationToken)
             {
-                await Task.CompletedTask;
-                var result = Enumerable.Empty<Employee>().AsQueryable();
+                var result = await repository.DepartmentEmployeesAsync(key);
                 return options.ApplyODataOptions(result);
             }
         }
 
-        [Endpoint<Department, Guid, Company>(EndpointMethod.Get, "company")]
-        public class GetDepartmentCompany : IEndpointGetByNavigationHandler<Department, Guid, Company>
+        [Endpoint<Department, Guid, Company>(EndpointMethod.Get)]
+        public class GetDepartmentCompany(IRepository repository) : IEndpointGetByNavigationHandler<Department, Guid, Company>
         {
             public async Task<IMediatrResult<dynamic>> Handle(Guid key, Type TDomainObject, IODataQueryOptionsWithPageSize<Company> options, CancellationToken cancellationToken)
             {
-                await Task.CompletedTask;
-                var result = Enumerable.Empty<Employee>().AsQueryable();
+                var result = await repository.DepartmentCompanyAsync(key);
                 return options.ApplyODataOptions(result);
+            }
+        }
+
+        [Endpoint<Department, Guid, DomainObject>(EndpointMethod.Get)]
+        public class GetDepartmentMembers : IEndpointGetByNavigationHandler<Department, Guid, DomainObject>
+        {
+            public async Task<IMediatrResult<dynamic>> Handle(Guid key, Type TDomainObject, IODataQueryOptionsWithPageSize<DomainObject> options, CancellationToken cancellationToken)
+            {
+                await Task.CompletedTask;
+                var result = Enumerable.Empty<DomainObject>().AsQueryable();
+                return options.ApplyODataOptions(result);
+
+                //await Task.CompletedTask;
+                //List<DomainObject> list = new List<DomainObject>();
+                //list.Add(new DomainObject { DisplayName = "test", Key = Guid.NewGuid().ToString(), Type = "DomainObject.Something" });
+                //list.Add(new DomainObject { DisplayName = "test1", Key = Guid.NewGuid().ToString(), Type = "DomainObject.Something1" });
+                //var result = list.AsQueryable();
+                //return options.ApplyODataOptions(result);
             }
         }
     }

@@ -18,23 +18,36 @@ public class EndpointMetadata
     public required EndpointMethod HttpMethod { set; get; } = EndpointMethod.Get;
     public required EndpointBinding Binding { set; get; } = EndpointBinding.CustomBinding;
     public required bool KeyInRoute { set; get; } = false;
+    public required Produces Produces { set; get; } = Produces.IEnumerable;
     public required Type HandlerType { set; get; } = default!;
     public required ServiceDescriptor ServiceDescriptor { set; get; } = default!;
     public required IAuthorizeData AuthorizeData { set; get; } = default!;
 
     internal static EndpointMetadata Create(Type targetType, EndpointAttribute endpointAttribute)
     {
+        //Determin the information for the root endpoint
         targetType.TryGetGroupRoute(out var groupRoute);
         endpointAttribute.TryGetRoute(out var route);
-        endpointAttribute.TryGetRouteSegment(out var routeSegment);
-        endpointAttribute.TryGetHttpMethod(out var httpMethod);
-        endpointAttribute.TryGetKeyInRoute(out var keyInRoute);
-        endpointAttribute.TryGetBinding(out var binding);
+        //Determin the DomainObject
         endpointAttribute.TryGetDomainObjectType(out var domainObjectType);
-        endpointAttribute.TryGetKeyType(out var keyType);
+        //Detarmin the NavigationObject if it is defined
         endpointAttribute.TryGetNavigationObjectType(out var navigationObjectType);
+        //Determin the HttpMethod
+        endpointAttribute.TryGetHttpMethod(out var httpMethod);
+        //Check if the key is in the route
+        endpointAttribute.TryGetKeyInRoute(out var keyInRoute);
+        //And determin the binding for the correct endpoint
+        endpointAttribute.TryGetBinding(out var binding);
+        //Get the KeyType if necessary
+        endpointAttribute.TryGetKeyType(out var keyType);
+        //Get the routesegment
+        domainObjectType.TryGetRouteSegment(navigationObjectType, out var routeSegment);
+        //Get the Produces
+        domainObjectType.TryGetProduces(navigationObjectType, keyInRoute, httpMethod, out var produces);
 
+        //Get the implementation Interface
         var implementationInterface = TryGetImplementationInterface(httpMethod, keyType, navigationObjectType);
+        //Determin the autorization
         var endpointAuthorizeAttribute = targetType.GetCustomAttribute<ODataAuthorizeAttribute>() ?? default!;
         var domainObjectAuthorizeAttribute = domainObjectType.GetCustomAttribute<ODataAuthorizeAttribute>() ?? default!;
         IAuthorizeData authorizeData = (IAuthorizeData)endpointAuthorizeAttribute ?? (IAuthorizeData)domainObjectAuthorizeAttribute ?? default!;
@@ -44,26 +57,27 @@ public class EndpointMetadata
 
         var serviceType = TryGetServiceType(httpMethod, domainObjectType, keyType, navigationObjectType);
         if (serviceType == default!)
-            throw new MissingMemberException($"The serviceType for {domainObjectType.Name} and httpMethod {httpMethod} is not found, your endpointhandler is malformatted.");
+            throw new MissingMemberException($"The serviceType for {domainObjectType?.Name} and httpMethod {httpMethod} is not found, your endpointhandler is malformatted.");
         var serviceDescriptor = new ServiceDescriptor(serviceType, targetType, ServiceLifetime.Transient) ?? default!;
 
         return new EndpointMetadata
         {
             AuthorizeData = authorizeData ?? default!,
             Binding = binding,
-            DomainObjectType = domainObjectType,
+            DomainObjectType = domainObjectType ?? default!,
             HandlerType = implementationInterface,
             HttpMethod = httpMethod,
             KeyInRoute = keyInRoute,
             KeyType = keyType,
-            NavigationObjectType = navigationObjectType,
+            Produces = produces,
+            NavigationObjectType = navigationObjectType ?? default!,
             Route = string.IsNullOrEmpty(route) ? groupRoute : route,
             RouteSegment = routeSegment,
             ServiceDescriptor = serviceDescriptor
         } ?? default!;
     }
 
-    private static Type TryGetServiceType(EndpointMethod httpMethod, Type domainObjectType, Type keyType, Type navigationObjectType)
+    private static Type TryGetServiceType(EndpointMethod httpMethod, Type? domainObjectType, Type keyType, Type? navigationObjectType)
     {
         if (httpMethod == EndpointMethod.Delete && keyType is not null && domainObjectType is not null && navigationObjectType is null)
         {

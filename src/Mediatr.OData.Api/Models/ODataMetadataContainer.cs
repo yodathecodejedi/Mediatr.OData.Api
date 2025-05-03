@@ -1,5 +1,6 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Abstractions.Interfaces;
+using Mediatr.OData.Api.Enumerations;
 using Mediatr.OData.Api.Extensions;
 using Mediatr.OData.Api.Metadata;
 using Mediatr.OData.Api.RequestHandlers;
@@ -10,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using System.Data;
-using System.Reflection;
 
 namespace Mediatr.OData.Api.Models;
 
@@ -84,44 +84,27 @@ public class ODataMetadataContainer(string routePrefix)
 
         foreach (var (endpointKey, metadata) in _endpointMetadata)
         {
-            //The ClrObjectType that is used in the ODataModelBuilder
-            Type objectType = endpointKey.ObjectType;
-            //The properties of the ClrOjectType
-            PropertyInfo[] objectProperties = endpointKey.ObjectType.GetProperties();
-            //The TypeConfiguration for the EdmModel
-            EntityTypeConfiguration oDataEntityType = modelBuilder.AddEntityType(endpointKey.ObjectType);
-            //The SetConfiguration for the EdmModel
-            EntitySetConfiguration entitySetConfiguration = modelBuilder.AddEntitySet(endpointKey.Route, oDataEntityType);
-
-            if (!objectType.TryGetKeyProperty(out var keyProperty) && !oDataEntityType.Keys.Any())
+            //Try to add the domain object to the EDM model
+            if (!modelBuilder.TryAddDomainObject(metadata, DomainObjectType.DomainObject, out var domainObjectTypeConfiguration))
             {
-                //Missing keyproperty
-                throw new MissingPrimaryKeyException($"The key property is not declared in {objectType.FullName}. Please use ODataKeyAttribute on the key property.");
+                throw new InvalidOperationException($"The domain object {metadata.DomainObjectType.FullName} could not be added to the EDM model.");
             }
-            oDataEntityType.HasKey(keyProperty);
-
-            //Get the properties we need to exclude from the EDM model (e.g. ODataIgnore, ODataETag) 
-            var propertiesToBeIgnored = objectProperties
-                //Exclude the KeyProperty from the list of properties to be ignored just in case it was an Implicit Key 
-                .Where(prop => !prop.Name.Equals(keyProperty.Name))
-                //Select the following Attributes ODataIgnore, ODataETag
-                .Where(prop =>
-                    prop.GetCustomAttributes<ODataETagAttribute>().Any() ||
-                    prop.GetCustomAttributes<ODataIgnoreAttribute>().Any());
-
-            foreach (var propertyToBeIgnored in propertiesToBeIgnored)
+            //Try to add the domain set to the EDM model 
+            if (!modelBuilder.TryAddEntityset(metadata, domainObjectTypeConfiguration, out var domainSetTypeConfiguration))
             {
-                //Remove the property from the EDM model, so it is not returned from OData
-                entitySetConfiguration.EntityType.RemoveProperty(propertyToBeIgnored);
+                throw new InvalidOperationException($"The entity set {metadata.Route} could not be added to the EDM model.");
             }
-
-            //Add the enumaration properties to the EDM model
-            var enumProperties = objectProperties
-                .Where(x => x.PropertyType.IsEnum)
-                .ToList();
-            foreach (var property in enumProperties)
+            if (metadata.NavigationObjectType is not null)
             {
-                modelBuilder.AddEnumType(property.PropertyType);
+                //Try to add the navigation object to the EDM model
+                if (!modelBuilder.TryAddDomainObject(metadata, DomainObjectType.NavigationObject, out var navigationObjectTypeConfiguration))
+                {
+                    throw new InvalidOperationException($"The navigation object {metadata.NavigationObjectType.FullName} could not be added to the EDM model.");
+                }
+                if (navigationObjectTypeConfiguration is not null)
+                {
+                    modelBuilder.TryAddNavigationProperty(metadata, domainObjectTypeConfiguration, navigationObjectTypeConfiguration);
+                }
             }
         }
         //Build the mopdel

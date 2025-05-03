@@ -1,4 +1,5 @@
-﻿using Mediatr.OData.Api.Models;
+﻿using Mediatr.OData.Api.Abstractions.Models;
+using Mediatr.OData.Api.Models;
 using Microsoft.AspNetCore.OData.Formatter;
 
 namespace Mediatr.OData.Api.Extensions;
@@ -13,6 +14,12 @@ public static class ResourceContextExtensions
         oDataTypeName = default!;
         var typeName = resourceContext.ResourceInstance.GetType().Name ?? default!;
         var fullName = resourceContext.ResourceInstance.GetType().FullName ?? default!;
+
+        if (resourceContext.ResourceInstance is DomainObject)
+        {
+            return false;
+        }
+
         //Reflection failed to get the type name
         if (string.IsNullOrWhiteSpace(typeName) || string.IsNullOrWhiteSpace(fullName))
         {

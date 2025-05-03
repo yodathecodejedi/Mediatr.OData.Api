@@ -3,7 +3,7 @@ using Mediatr.OData.Api.Abstractions.Interfaces;
 
 namespace Mediatr.OData.Api.Abstractions.Models;
 
-public abstract class GenericDomainObject : IDomainObject<string>
+public sealed class DomainObject : IDomainObject<string>
 {
     [ODataType]
     public string Type { get; set; } = string.Empty;

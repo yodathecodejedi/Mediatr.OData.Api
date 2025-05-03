@@ -5,5 +5,6 @@ public enum PropertyCategory
     Value = 0,
     Object = 1,
     Navigation = 2,
-    Unknown = 3
+    Key = 3,
+    Unknown = 4
 }

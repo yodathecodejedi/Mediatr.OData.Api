@@ -41,17 +41,6 @@ public class Repository(IDbConnection connection) : IRepository, IDisposable
     }
     #endregion
 
-    //public async Task<Department> DepartmentAsync(int Id = default!, bool departmentOnly = false)
-    //{
-    //    if (!TryOpenConnection())
-    //        return default!;
-
-    //    var departments = await DepartmentsAsync(Id, departmentOnly);
-
-    //    TryCloseConnection();
-    //    return departments.FirstOrDefault() ?? default!;
-    //}
-
     public async Task<Department> DepartmentAsync(Guid key = default!, bool departmentOnly = false)
     {
         if (!TryOpenConnection())
@@ -62,17 +51,6 @@ public class Repository(IDbConnection connection) : IRepository, IDisposable
         TryCloseConnection();
         return departments.FirstOrDefault() ?? default!;
     }
-
-    //public async Task<IQueryable<Department>> DepartmentsAsync(int Id = default!, bool departmentOnly = false)
-    //{
-    //    if (!TryOpenConnection())
-    //        return Enumerable.Empty<Department>().AsQueryable();
-
-    //    var departments = await DepartmentQueries.PopulateDepartments(connection, Id, departmentOnly);
-
-    //    TryCloseConnection();
-    //    return departments;
-    //}
 
     public async Task<IQueryable<Department>> DepartmentsAsync(Guid key = default!, bool departmentOnly = false)
     {
@@ -85,23 +63,43 @@ public class Repository(IDbConnection connection) : IRepository, IDisposable
         return departments;
     }
 
-    public async Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false)
+    public async Task<IQueryable<Employee>> DepartmentEmployeesAsync(Guid key = default!)
     {
-        await Task.CompletedTask;
         if (!TryOpenConnection())
             return Enumerable.Empty<Employee>().AsQueryable();
+        var departments = await DepartmentQueries.PopulateDepartmentEmployees(connection, key);
+
         TryCloseConnection();
-        return default!;
+        return departments;
     }
 
-    public async Task<IQueryable<Company>> CompaniesAsync(int Id = default!, bool companyOnly = false)
+    public async Task<Company> DepartmentCompanyAsync(Guid key = default!)
     {
-        await Task.CompletedTask;
         if (!TryOpenConnection())
-            return Enumerable.Empty<Company>().AsQueryable();
+            return default!;
+        var company = await DepartmentQueries.PopulateDepartmentCompany(connection, key);
+
         TryCloseConnection();
-        return default!;
+        return company;
     }
+
+    //public async Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false)
+    //{
+    //    await Task.CompletedTask;
+    //    if (!TryOpenConnection())
+    //        return Enumerable.Empty<Employee>().AsQueryable();
+    //    TryCloseConnection();
+    //    return default!;
+    //}
+
+    //public async Task<IQueryable<Company>> CompaniesAsync(int Id = default!, bool companyOnly = false)
+    //{
+    //    await Task.CompletedTask;
+    //    if (!TryOpenConnection())
+    //        return Enumerable.Empty<Company>().AsQueryable();
+    //    TryCloseConnection();
+    //    return default!;
+    //}
 
     #region Dispose pattern
     private bool disposedValue;

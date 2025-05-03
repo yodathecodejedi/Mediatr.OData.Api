@@ -13,6 +13,7 @@ public class ODataTypeResourceSerializer : ResourceSerializer
         if (resourceContext is null) return;
         if (serializerResult.Count == 0) return;
 
+        //Hier aan het genericDomainObject type of zijn kinderen overslaan.
         if (resourceContext.StructuredType.TypeKind is Microsoft.OData.Edm.EdmTypeKind.Entity)
         {
             if (resourceContext.TryGetODataTypeName(out string oDataTypeName))

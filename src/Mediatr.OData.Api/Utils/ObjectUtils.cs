@@ -25,31 +25,4 @@ public static class ObjectUtils
 
         return target;
     }
-
-    //public static Action<TModel, TKey> BuildSetter<TModel, TKey>(PropertyInfo propertyInfo)
-    //{
-    //    ArgumentNullException.ThrowIfNull(propertyInfo);
-
-    //    if (!propertyInfo.CanWrite)
-    //        throw new InvalidOperationException($"The property '{propertyInfo.Name}' does not have a setter.");
-
-    //    var targetType = typeof(TModel);
-
-    //    // Create parameter expressions
-    //    var targetParameter = Expression.Parameter(targetType, "target");
-    //    var valueParameter = Expression.Parameter(typeof(TKey), "value");
-
-    //    // Convert the value to the property's type
-    //    var convertedValue = Expression.Convert(valueParameter, propertyInfo.PropertyType);
-
-    //    // Create a property access memberExpression
-    //    var propertyAccess = Expression.Property(targetParameter, propertyInfo);
-
-    //    // Create an assignment memberExpression
-    //    var assign = Expression.Assign(propertyAccess, convertedValue);
-
-    //    // Compile the setter
-    //    var setterLambda = Expression.Lambda<Action<TModel, TKey>>(assign, targetParameter, valueParameter);
-    //    return setterLambda.Compile();
-    //}
 }

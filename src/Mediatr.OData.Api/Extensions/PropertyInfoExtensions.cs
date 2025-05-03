@@ -1,4 +1,6 @@
-﻿using Mediatr.OData.Api.Abstractions.Enumerations;
+﻿using Mediatr.OData.Api.Abstractions.Attributes;
+using Mediatr.OData.Api.Abstractions.Enumerations;
+using Microsoft.OData.Edm;
 using System.Collections;
 using System.Reflection;
 
@@ -15,6 +17,7 @@ public static class PropertyInfoExtensions
         try
         {
             var type = propertyInfo.PropertyType;
+            if (type.GetCustomAttributes<ODataKeyAttribute>().Any()) { propertyCategory = PropertyCategory.Key; return true; }
             if (type.IsArray) { propertyCategory = PropertyCategory.Navigation; return true; }
 
             if (type.IsEnum) { propertyCategory = PropertyCategory.Value; return true; }
@@ -78,7 +81,45 @@ public static class PropertyInfoExtensions
 
         return Nullable.GetUnderlyingType(property.PropertyType) != null;
     }
+    #endregion
 
+    #region EdmMultiplicity type
+    public static bool TryGetEdmMultiplicityType(this PropertyInfo propertyInfo, out EdmMultiplicity edmMultiplicity)
+    {
+        edmMultiplicity = EdmMultiplicity.Unknown;
+        if (propertyInfo == default!) return false;
+        if (!propertyInfo.TryGetPropertyCategory(out var propertyCategory)) return false;
+        if (propertyCategory == PropertyCategory.Navigation)
+        {
+            edmMultiplicity = EdmMultiplicity.Many;
+            return true;
+        }
+        if (propertyCategory == PropertyCategory.Object)
+        {
+            edmMultiplicity = propertyInfo.IsTypeNullable() ? EdmMultiplicity.ZeroOrOne : EdmMultiplicity.One;
+            return true;
+        }
 
+        return false;
+    }
+
+    public static bool TryGetProduces(this PropertyInfo propertyInfo, out Produces produces)
+    {
+        produces = Produces.Value;
+        if (propertyInfo == default!) return false;
+        if (!propertyInfo.TryGetPropertyCategory(out var propertyCategory)) return false;
+        if (propertyCategory == PropertyCategory.Navigation)
+        {
+            produces = Produces.IEnumerable;
+            return true;
+        }
+        if (propertyCategory == PropertyCategory.Object)
+        {
+            produces = Produces.Object;
+            return true;
+        }
+
+        return false;
+    }
     #endregion
 }
