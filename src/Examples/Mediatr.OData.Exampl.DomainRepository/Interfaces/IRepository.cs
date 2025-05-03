@@ -7,15 +7,15 @@ public interface IRepository
 {
     public ConnectionState State { get; }
 
-    //public Task<Department> DepartmentAsync(int Id = default!, bool departmentOnly = false);
     public Task<Department> DepartmentAsync(Guid key = default!, bool departmentOnly = false);
 
-    //public Task<IQueryable<Department>> DepartmentsAsync();
-
-    //public Task<IQueryable<Department>> DepartmentsAsync(int Id = default!, bool departmentOnly = false);
     public Task<IQueryable<Department>> DepartmentsAsync(Guid Key = default!, bool departmentOnly = false);
 
-    public Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false);
+    public Task<IQueryable<Employee>> DepartmentEmployeesAsync(Guid key = default!);
 
-    public Task<IQueryable<Company>> CompaniesAsync(int Id = default!, bool companyOnly = false);
+    public Task<Company> DepartmentCompanyAsync(Guid key = default!);
+
+    //public Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false);
+
+    //public Task<IQueryable<Company>> CompaniesAsync(int Id = default!, bool companyOnly = false);
 }

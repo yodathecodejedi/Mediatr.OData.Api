@@ -1,9 +1,13 @@
-﻿using Mediatr.OData.Api.Abstractions.Interfaces;
+﻿using Mediatr.OData.Api.Abstractions.Attributes;
+using Mediatr.OData.Api.Abstractions.Interfaces;
 
 namespace Mediatr.OData.Api.Abstractions.Models;
 
-public abstract class DomainObject : IDomainObject
+public sealed class DomainObject : IDomainObject<string>
 {
-    // This class is empty because it is used as a base class for other domain objects.
-    // It can be extended in the future if needed.
+    [ODataType]
+    public string Type { get; set; } = string.Empty;
+    [ODataKey]
+    public string Key { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
 }

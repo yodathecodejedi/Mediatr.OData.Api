@@ -36,21 +36,6 @@ public static class EndpointAttributeExtensions
         }
     }
 
-    public static bool TryGetRouteSegment(this EndpointAttribute endpointAttribute, out string routeSegment)
-    {
-        routeSegment = string.Empty;
-        ArgumentNullException.ThrowIfNull(endpointAttribute);
-        try
-        {
-            routeSegment = endpointAttribute.RouteSegment;
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     public static bool TryGetHttpMethod(this EndpointAttribute endpointAttribute, out EndpointMethod httpMethod)
     {
         httpMethod = EndpointMethod.Get;

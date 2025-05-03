@@ -4,7 +4,7 @@ using Mediatr.OData.Api.Abstractions.Models;
 
 namespace Mediatr.OData.Example.DomainModel.Company
 {
-    public sealed class Department : DomainObject, IDomainObject<Guid>
+    public sealed class Department : IDomainObject<Guid>
     {
         //Keys
         [ODataIgnore]
@@ -14,6 +14,7 @@ namespace Mediatr.OData.Example.DomainModel.Company
         public Guid Key { get; set; }
 
         //Fields
+        [ODataDisplayName]
         public string Name { get; set; } = default!;
         public string? Description { get; set; } = default!;
 
@@ -28,6 +29,6 @@ namespace Mediatr.OData.Example.DomainModel.Company
         //Navigation
         public Company? Company { get; set; } = default!;
         public ICollection<Employee>? Employees { get; set; } = default!;
-
+        public ICollection<DomainObject> Members { get; set; } = default!;
     }
 }

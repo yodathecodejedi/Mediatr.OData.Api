@@ -7,9 +7,9 @@ namespace Mediatr.OData.Api.Extensions;
 
 public static class TypeExtensions
 {
-    public static bool TryGetReferenceProperties(this Type? type, out Dictionary<string, PropertyCategory> navigationProperties)
+    public static bool TryGetReferenceProperties(this Type? type, out Dictionary<string, PropertyCategory> referenceProperties)
     {
-        navigationProperties = default!;
+        referenceProperties = default!;
         if (type is null)
             return false;
 
@@ -22,12 +22,19 @@ public static class TypeExtensions
                 property.TryGetPropertyCategory(out PropertyCategory propertyCategory);
                 if (propertyCategory != default! && propertyCategory == PropertyCategory.Navigation || propertyCategory == PropertyCategory.Object)
                 {
+                    if (property.CustomAttributes.Any(ca =>
+                        ca.AttributeType == typeof(ODataIgnoreAttribute) ||
+                        ca.AttributeType == typeof(ODataETagAttribute)
+                        ) || property.Name.Equals("Hash"))
+                    {
+                        continue;
+                    }
                     intermediateProperties.Add(property.Name.ToLower(), propertyCategory);
                 }
             }
             if (intermediateProperties.Count > 0)
             {
-                navigationProperties = intermediateProperties;
+                referenceProperties = intermediateProperties;
                 return true;
             }
             return false;
@@ -93,5 +100,103 @@ public static class TypeExtensions
             }
         }
         return !string.IsNullOrEmpty(route);
+    }
+
+    public static bool TryGetProduces(this Type? domainObjectType, Type? navigationObjectType, bool keyInRoute, EndpointMethod httpMethod, out Produces produces)
+    {
+        produces = default!;
+        if (domainObjectType is null) return false;
+
+        if (!keyInRoute)
+        {
+            if (httpMethod == EndpointMethod.Delete) { produces = Produces.Value; return true; }
+            if (httpMethod == EndpointMethod.Get) { produces = Produces.IEnumerable; return true; }
+            produces = Produces.Object;
+            return true;
+        }
+        if (navigationObjectType is null)
+        {
+            produces = httpMethod != EndpointMethod.Delete ? Produces.Object : Produces.Value;
+            return true;
+        }
+        produces = httpMethod != EndpointMethod.Delete ? domainObjectType.GetNavigationProduces(navigationObjectType) : Produces.Value;
+        return true;
+    }
+
+    public static Produces GetNavigationProduces(this Type? domainObjectType, Type? navigationObjectType)
+    {
+        if (domainObjectType is null || navigationObjectType is null) return Produces.Value;
+
+        if (!domainObjectType.TryGetReferenceProperties(out var referenceProperties)) return Produces.Value;
+
+        PropertyInfo[] domainObjectPropertyInfos = domainObjectType.GetProperties();
+        foreach (var referenceProperty in referenceProperties)
+        {
+            PropertyInfo? propertyInfo = domainObjectPropertyInfos.FirstOrDefault(pi => pi.Name.ToLower().Equals(referenceProperty.Key.ToLower()));
+            if (propertyInfo is null) continue;
+            if (propertyInfo.PropertyType.IsClass && propertyInfo.PropertyType == navigationObjectType)
+            {
+                return Produces.Object;
+            }
+            if (propertyInfo.PropertyType.IsArray && propertyInfo.PropertyType.GetElementType() == navigationObjectType)
+            {
+                return Produces.IEnumerable;
+            }
+            if (propertyInfo.PropertyType.IsGenericType)
+            {
+                var genericDefinition = propertyInfo.PropertyType.GetGenericTypeDefinition();
+                if (typeof(IEnumerable<>).IsAssignableFrom(genericDefinition) ||
+                          typeof(ICollection<>).IsAssignableFrom(genericDefinition) ||
+                          typeof(IList<>).IsAssignableFrom(genericDefinition) ||
+                          typeof(List<>).IsAssignableFrom(genericDefinition))
+                {
+                    if (propertyInfo.PropertyType.GetGenericArguments()[0] == navigationObjectType)
+                    {
+                        return Produces.IEnumerable;
+                    }
+                }
+            }
+        }
+        return Produces.Value;
+    }
+
+    public static bool TryGetRouteSegment(this Type? domainObjectType, Type? navigationObjectType, out string routeSegment)
+    {
+        routeSegment = string.Empty;
+        if (domainObjectType is null || navigationObjectType is null) return true;
+
+        if (!domainObjectType.TryGetReferenceProperties(out var referenceProperties)) return true;
+        PropertyInfo[] domainObjectPropertyInfos = domainObjectType.GetProperties();
+
+        foreach (var referenceProperty in referenceProperties)
+        {
+            PropertyInfo? propertyInfo = domainObjectPropertyInfos.FirstOrDefault(pi => pi.Name.ToLower().Equals(referenceProperty.Key.ToLower()));
+            if (propertyInfo is null) continue;
+            if (propertyInfo.PropertyType.IsClass && propertyInfo.PropertyType == navigationObjectType)
+            {
+                routeSegment = referenceProperty.Key;
+                break;
+            }
+            if (propertyInfo.PropertyType.IsArray && propertyInfo.PropertyType.GetElementType() == navigationObjectType)
+            {
+                routeSegment = referenceProperty.Key;
+                break;
+            }
+            if (propertyInfo.PropertyType.IsGenericType)
+            {
+                var genericDefinition = propertyInfo.PropertyType.GetGenericTypeDefinition();
+                if (typeof(IEnumerable<>).IsAssignableFrom(genericDefinition) ||
+                          typeof(ICollection<>).IsAssignableFrom(genericDefinition) ||
+                          typeof(IList<>).IsAssignableFrom(genericDefinition) ||
+                          typeof(List<>).IsAssignableFrom(genericDefinition))
+                {
+                    if (propertyInfo.PropertyType.GetGenericArguments()[0] == navigationObjectType)
+                    {
+                        routeSegment = referenceProperty.Key;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

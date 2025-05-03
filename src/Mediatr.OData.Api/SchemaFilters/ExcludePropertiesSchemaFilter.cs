@@ -10,7 +10,7 @@ public class ExcludePropertiesSchemaFilter : ISchemaFilter
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
         //Exclude properties that are not relevant for the OData API Model
-        var excludedProperties = context.Type.GetProperties()
+        List<string> excludedProperties = [.. context.Type.GetProperties()
             .Where(p =>
                 //Based on the implicit name of the property ETag or Hash
                 p.Name.Equals("Hash") || p.Name.Equals("ETag") ||
@@ -18,16 +18,25 @@ public class ExcludePropertiesSchemaFilter : ISchemaFilter
                 p.GetCustomAttribute<ODataIgnoreAttribute>() != null ||
                 p.GetCustomAttribute<ODataETagAttribute>() != null
             )
-            .Select(p => p.Name);
+            .Select(p => p.Name)];
 
-        var propertiesToRemove = schema.Properties
+        List<string> propertiesToRemove = [.. schema.Properties
             .Where(p => excludedProperties.Contains(p.Key, StringComparer.OrdinalIgnoreCase))
-            .Select(p => p.Key)
-            .ToList();
+            .Select(p => p.Key)];
 
         foreach (var prop in propertiesToRemove)
         {
 
+            schema.Properties.Remove(prop);
+        }
+
+        propertiesToRemove = [.. schema.Properties
+            .Where(prop => prop.Key.StartsWith("@odata", StringComparison.OrdinalIgnoreCase))
+            .Select(prop => prop.Key)];
+
+        //Remove Odata Properties
+        foreach (var prop in propertiesToRemove)
+        {
             schema.Properties.Remove(prop);
         }
     }

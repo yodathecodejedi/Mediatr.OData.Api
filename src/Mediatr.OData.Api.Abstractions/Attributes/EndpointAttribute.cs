@@ -3,13 +3,12 @@ using Mediatr.OData.Api.Abstractions.Interfaces;
 
 namespace Mediatr.OData.Api.Abstractions.Attributes;
 
-[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 public abstract class EndpointAttribute : Attribute
 {
     #region Properties
     public string Route { get; set; } = string.Empty;
     public bool KeyInRoute { get; protected set; } = false;
-    public string RouteSegment { get; set; } = string.Empty;
     public EndpointMethod HttpMethod { get; set; } = EndpointMethod.Get;
     public EndpointBinding Binding { get; protected set; } = EndpointBinding.CustomBinding;
     public string? RoutePrefix { get; protected set; } = null;
@@ -27,37 +26,22 @@ public abstract class EndpointAttribute : Attribute
         HttpMethod = httpMethod;
     }
 
-    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment)
+    public EndpointAttribute(EndpointMethod httpMethod, string routePrefix)
     {
-        RouteSegment = routeSegment;
-        HttpMethod = httpMethod;
-    }
-
-    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment)
-    {
-        Route = route;
-        RouteSegment = routeSegment;
-        HttpMethod = httpMethod;
-    }
-
-    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment, string routePrefix)
-    {
-        RouteSegment = routeSegment;
         HttpMethod = httpMethod;
         RoutePrefix = routePrefix;
     }
 
-    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment, string routePrefix)
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routePrefix)
     {
         Route = route;
-        RouteSegment = routeSegment;
         HttpMethod = httpMethod;
         RoutePrefix = routePrefix;
     }
     #endregion
 }
 
-[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 public sealed class EndpointAttribute<TDomainObject> : EndpointAttribute
     where TDomainObject : class, IDomainObject
 {
@@ -73,28 +57,18 @@ public sealed class EndpointAttribute<TDomainObject> : EndpointAttribute
         Binding = EndpointBinding.DomainObjectBinding;
     }
 
-    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment) : base(httpMethod, routeSegment)
+    public EndpointAttribute(EndpointMethod httpMethod, string routePrefix) : base(httpMethod, routePrefix)
     {
         Binding = EndpointBinding.DomainObjectBinding;
     }
 
-    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment) : base(route, httpMethod, routeSegment)
-    {
-        Binding = EndpointBinding.DomainObjectBinding;
-    }
-
-    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(httpMethod, routeSegment, routePrefix)
-    {
-        Binding = EndpointBinding.DomainObjectBinding;
-    }
-
-    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(route, httpMethod, routeSegment, routePrefix)
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routePrefix) : base(route, httpMethod, routePrefix)
     {
         Binding = EndpointBinding.DomainObjectBinding;
     }
 }
 
-[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 public sealed class EndpointAttribute<TDomainObject, Tkey> : EndpointAttribute
     where TDomainObject : class, IDomainObject<Tkey>
     where Tkey : notnull
@@ -115,32 +89,20 @@ public sealed class EndpointAttribute<TDomainObject, Tkey> : EndpointAttribute
         KeyInRoute = true;
     }
 
-    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment) : base(httpMethod, routeSegment)
+    public EndpointAttribute(EndpointMethod httpMethod, string routePrefix) : base(httpMethod, routePrefix)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;
     }
 
-    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment) : base(route, httpMethod, routeSegment)
-    {
-        Binding = EndpointBinding.DomainObjectBinding;
-        KeyInRoute = true;
-    }
-
-    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(httpMethod, routeSegment, routePrefix)
-    {
-        Binding = EndpointBinding.DomainObjectBinding;
-        KeyInRoute = true;
-    }
-
-    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(route, httpMethod, routeSegment, routePrefix)
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routePrefix) : base(route, httpMethod, routePrefix)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;
     }
 }
 
-[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 public sealed class EndpointAttribute<TDomainObject, Tkey, TNavigationObject> : EndpointAttribute
     where TDomainObject : class, IDomainObject<Tkey>
     where Tkey : notnull
@@ -162,25 +124,13 @@ public sealed class EndpointAttribute<TDomainObject, Tkey, TNavigationObject> : 
         KeyInRoute = true;
     }
 
-    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment) : base(httpMethod, routeSegment)
+    public EndpointAttribute(EndpointMethod httpMethod, string routePrefix) : base(httpMethod, routePrefix)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;
     }
 
-    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment) : base(route, httpMethod, routeSegment)
-    {
-        Binding = EndpointBinding.DomainObjectBinding;
-        KeyInRoute = true;
-    }
-
-    public EndpointAttribute(EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(httpMethod, routeSegment, routePrefix)
-    {
-        Binding = EndpointBinding.DomainObjectBinding;
-        KeyInRoute = true;
-    }
-
-    public EndpointAttribute(string route, EndpointMethod httpMethod, string routeSegment, string routePrefix) : base(route, httpMethod, routeSegment, routePrefix)
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routePrefix) : base(route, httpMethod, routePrefix)
     {
         Binding = EndpointBinding.DomainObjectBinding;
         KeyInRoute = true;

@@ -12,7 +12,6 @@ public static class HttpResultExtensions
         {
             return result.ToResults();
         }
-
         return new ODataResults<T> { Data = result.Data };
     }
 
