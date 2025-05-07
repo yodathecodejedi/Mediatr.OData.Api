@@ -2,6 +2,7 @@
 using Mediatr.OData.Api.Abstractions.Enumerations;
 using Mediatr.OData.Api.Abstractions.Interfaces;
 using Mediatr.OData.Api.Abstractions.Models;
+using Mediatr.OData.Api.Extensions;
 using Mediatr.OData.Api.Factories;
 using Mediatr.OData.Example.DomainModel.Company;
 using Mediatr.OData.Example.DomainRepository.Interfaces;
@@ -36,6 +37,15 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
             public async Task<IMediatrResult<dynamic>> Handle(IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
             {
                 var result = await repository.DepartmentsAsync();
+                return options.ApplyODataOptions(result);
+            }
+        }
+
+        public class GetDepartments2(IRepository respositry) : IEndpointGetHandler<Department>
+        {
+            public async Task<IMediatrResult<dynamic>> Handle(IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
+            {
+                var result = await respositry.DepartmentsAsync();
                 return options.ApplyODataOptions(result);
             }
         }
@@ -108,22 +118,13 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
         }
 
         [Endpoint<Department, Guid, DomainObject>(EndpointMethod.Get)]
-        public class GetDepartmentMembers : IEndpointGetByNavigationHandler<Department, Guid, DomainObject>
+        public class GetDepartmentMembers(IRepository repository) : IEndpointGetByNavigationHandler<Department, Guid, DomainObject>
         {
             public async Task<IMediatrResult<dynamic>> Handle(Guid key, Type TDomainObject, IODataQueryOptionsWithPageSize<DomainObject> options, CancellationToken cancellationToken)
             {
-                await Task.CompletedTask;
-                var result = Enumerable.Empty<DomainObject>().AsQueryable();
-                return options.ApplyODataOptions(result);
-
-                //await Task.CompletedTask;
-                //List<DomainObject> list = new List<DomainObject>();
-                //list.Add(new DomainObject { DisplayName = "test", Key = Guid.NewGuid().ToString(), Type = "DomainObject.Something" });
-                //list.Add(new DomainObject { DisplayName = "test1", Key = Guid.NewGuid().ToString(), Type = "DomainObject.Something1" });
-                //var result = list.AsQueryable();
-                //return options.ApplyODataOptions(result);
+                var result = await repository.DepartmentMembersAsync(key);
+                return options.ApplyODataOptions(result.ToDomainObjects());
             }
         }
     }
-
 }

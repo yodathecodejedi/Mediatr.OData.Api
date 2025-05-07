@@ -18,8 +18,11 @@ public class ODataTypeResourceSerializer : ResourceSerializer
         {
             if (resourceContext.TryGetODataTypeName(out string oDataTypeName))
             {
-                ODataTypeAnnotation annotation = new(oDataTypeName);
-                serializerResult.Resource.TypeAnnotation = annotation;
+                if (!oDataTypeName.Equals("Mediatr.OData.Api.Abstractions.Models.DomainObject"))
+                {
+                    ODataTypeAnnotation annotation = new(oDataTypeName);
+                    serializerResult.Resource.TypeAnnotation = annotation;
+                }
             }
         }
     }

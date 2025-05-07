@@ -1,4 +1,5 @@
-﻿using Mediatr.OData.Example.DomainModel.Company;
+﻿using Mediatr.OData.Api.Abstractions.Interfaces;
+using Mediatr.OData.Example.DomainModel.Company;
 using Mediatr.OData.Example.DomainRepository.Interfaces;
 using Mediatr.OData.Example.DomainRepository.Queries;
 using System.Data;
@@ -83,6 +84,15 @@ public class Repository(IDbConnection connection) : IRepository, IDisposable
         return company;
     }
 
+    public async Task<IQueryable<IDomainObject>> DepartmentMembersAsync(Guid key = default!)
+    {
+        if (!TryOpenConnection())
+            return Enumerable.Empty<IDomainObject>().AsQueryable();
+        var members = await DepartmentQueries.PopulateDepartmentMembers(connection, key);
+
+        TryCloseConnection();
+        return members;
+    }
     //public async Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false)
     //{
     //    await Task.CompletedTask;

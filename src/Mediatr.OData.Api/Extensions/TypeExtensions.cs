@@ -1,5 +1,6 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
 using Mediatr.OData.Api.Abstractions.Enumerations;
+using Mediatr.OData.Api.Models;
 using System.Data;
 using System.Reflection;
 
@@ -45,11 +46,76 @@ public static class TypeExtensions
         }
     }
 
+    public static bool TryGetODataTypeName(this Type? type, out string oDataTypeName)
+    {
+        oDataTypeName = default!;
+        ArgumentNullException.ThrowIfNull(type, nameof(type));
+        var typeName = type.Name ?? default!;
+        var fullName = type.FullName ?? default!;
+
+        //Reflection failed to get the type name
+        if (string.IsNullOrWhiteSpace(typeName) || string.IsNullOrWhiteSpace(fullName))
+        {
+            return false;
+        }
+
+        //Get configuration data
+        var oDataConfiguration = AppContext.GetData("ODataConfiguration") as ODataConfiguration;
+        //typeroot defaults to "type"
+        var typeRoot = string.IsNullOrWhiteSpace(oDataConfiguration?.TypeDefinition.Root) ? "type" : oDataConfiguration.TypeDefinition.Root;
+        var firstSegment = oDataConfiguration?.TypeDefinition.FirstSegment ?? default;
+        var useFirstSegment = firstSegment != default! && (oDataConfiguration?.TypeDefinition.UseFirstSegment ?? false);
+
+        //FirstSegment was not defined in the configuration or not found in the full name
+        if (string.IsNullOrWhiteSpace(firstSegment) || !fullName.Contains(firstSegment, StringComparison.CurrentCulture))
+        {
+            oDataTypeName = $"{typeRoot}.{typeName}";
+            return true;
+        }
+
+        //Take the substring including first segment or substring after first segment (also taking the additional . into account)
+        var segementIndex = useFirstSegment ? fullName.IndexOf(firstSegment) : fullName.IndexOf(firstSegment) + firstSegment.Length + 1;
+        typeName = fullName[segementIndex..];
+        oDataTypeName = $"{typeName}";
+        return true;
+    }
+
+
+    public static bool TryGetDisplayNameProperty(this Type? type, out PropertyInfo propertyInfo)
+    {
+        propertyInfo = default!;
+        ArgumentNullException.ThrowIfNull(type, nameof(type));
+
+        //ODataDisplayName Attribute
+        propertyInfo = type.GetProperties()
+            .SingleOrDefault(x => x.GetCustomAttribute<ODataDisplayNameAttribute>() is not null) ?? default!;
+
+        //Implicit DisplayName Attribute
+        propertyInfo ??= type.GetProperty("DisplayName") ?? default!;
+        //Implicit Name Attribute
+        propertyInfo ??= type.GetProperty("Name") ?? default!;
+        //Implicit ObjectName Attribute
+        propertyInfo ??= type.GetProperty(type.Name + "Name") ?? default!;
+        //Implicit Title Attribute
+        propertyInfo ??= type.GetProperty("Title") ?? default!;
+        //Implicit ObjectTitle Attribute
+        propertyInfo ??= type.GetProperty(type.Name + "Title") ?? default!;
+        //Implicit Label Attribute
+        propertyInfo ??= type.GetProperty("Label") ?? default!;
+        //Implicit ObjectLabel Attribute
+        propertyInfo ??= type.GetProperty(type.Name + "Label") ?? default!;
+        //Implicit Value Attribute
+        propertyInfo ??= type.GetProperty("Value") ?? default!;
+        //Implicit ObjectValue Attribute
+        propertyInfo ??= type.GetProperty(type.Name + "Value") ?? default!;
+
+        return (propertyInfo is not null);
+    }
+
     public static bool TryGetKeyProperty(this Type? type, out PropertyInfo propertyInfo)
     {
         propertyInfo = default!;
-        if (type is null)
-            return false;
+        ArgumentNullException.ThrowIfNull(type, nameof(type));
 
         //ODataKey Attribute
         propertyInfo = type.GetProperties()
