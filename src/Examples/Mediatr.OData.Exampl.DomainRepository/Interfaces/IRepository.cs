@@ -1,4 +1,5 @@
-﻿using Mediatr.OData.Example.DomainModel.Company;
+﻿using Mediatr.OData.Api.Abstractions.Interfaces;
+using Mediatr.OData.Example.DomainModel.Company;
 using System.Data;
 
 namespace Mediatr.OData.Example.DomainRepository.Interfaces;
@@ -14,6 +15,8 @@ public interface IRepository
     public Task<IQueryable<Employee>> DepartmentEmployeesAsync(Guid key = default!);
 
     public Task<Company> DepartmentCompanyAsync(Guid key = default!);
+
+    public Task<IQueryable<IDomainObject>> DepartmentMembersAsync(Guid key = default!);
 
     //public Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false);
 

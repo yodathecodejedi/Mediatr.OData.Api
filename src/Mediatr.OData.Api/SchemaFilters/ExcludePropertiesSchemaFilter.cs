@@ -16,7 +16,8 @@ public class ExcludePropertiesSchemaFilter : ISchemaFilter
                 p.Name.Equals("Hash") || p.Name.Equals("ETag") ||
                 //Based on the attributes
                 p.GetCustomAttribute<ODataIgnoreAttribute>() != null ||
-                p.GetCustomAttribute<ODataETagAttribute>() != null
+                p.GetCustomAttribute<ODataETagAttribute>() != null ||
+                p.GetCustomAttribute<ODataTypeAttribute>() != null
             )
             .Select(p => p.Name)];
 

@@ -10,9 +10,10 @@ public class ChainedResourceSerializer : ODataResourceSerializer
 
     public ChainedResourceSerializer(IODataSerializerProvider serializerProvider) : base(serializerProvider)
     {
+        _serializers.Add(new ODataGenericTypeResourceSerializer());
+        _serializers.Add(new ODataTypeResourceSerializer());
         _serializers.Add(new ODataIgnorePropertiesSerializer());
         _serializers.Add(new ODataETagResourceSerializer());
-        _serializers.Add(new ODataTypeResourceSerializer());
         _serializers.Add(new DateTimeOffsetResourceSerializer());
         _serializers.Add(new DateResourceSerializer());
         _serializers.Add(new TimeOfDayResourceSerializer());

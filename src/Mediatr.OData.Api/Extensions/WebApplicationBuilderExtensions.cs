@@ -43,7 +43,6 @@ public static class WebApplicationBuilderExtensions
         //Because of Scalar / Swagger UI
         builder.Services.AddSwaggerGen(options =>
         {
-            //options.OperationFilter<CountSchemaFilter>();
             options.DocumentFilter<CountDocumentFilter>();
             options.SchemaFilter<ExcludePropertiesSchemaFilter>();
             options.SchemaFilter<EnumSchemaFilter>();

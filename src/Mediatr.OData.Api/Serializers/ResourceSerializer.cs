@@ -9,7 +9,7 @@ public abstract class ResourceSerializer
 {
     public abstract void Process(SerializerResult serializerResult, SelectExpandNode selectExpandNode, ResourceContext resourceContext);
 
-    public ODataProperty GetODataProperty(ODataPropertyInfo propertyInfo, ODataResource oDataResource)
+    public static ODataProperty GetODataProperty(ODataPropertyInfo propertyInfo, ODataResource oDataResource)
     {
         if (oDataResource.TryGetODataProperty(propertyInfo, out ODataProperty oDataProperty))
         {
@@ -18,7 +18,7 @@ public abstract class ResourceSerializer
         return default!;
     }
 
-    public Type GetDeclaredType(ResourceContext resourceContext, ODataPropertyInfo oDataPropertyInfo)
+    public static Type GetDeclaredType(ResourceContext resourceContext, ODataPropertyInfo oDataPropertyInfo)
     {
         Type declaredEntityType = resourceContext.ResourceInstance.GetType();
         PropertyInfo declaredPropertyInfo = declaredEntityType.GetProperty(oDataPropertyInfo.Name) ?? default!;
