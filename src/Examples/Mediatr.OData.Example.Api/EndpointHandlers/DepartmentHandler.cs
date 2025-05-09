@@ -41,11 +41,11 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
             }
         }
 
-        public class GetDepartments2(IRepository respositry) : IEndpointGetHandler<Department>
+        public class GetDepartments2(IRepository repository) : IEndpointGetHandler<Department>
         {
             public async Task<IMediatrResult<dynamic>> Handle(IODataQueryOptionsWithPageSize<Department> options, CancellationToken cancellationToken)
             {
-                var result = await respositry.DepartmentsAsync();
+                var result = await repository.DepartmentsAsync();
                 return options.ApplyODataOptions(result);
             }
         }
