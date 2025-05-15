@@ -2,7 +2,7 @@
   <!-- Here we set our Assyembly and NugetPackage Version -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <PackageOutputPath>$(SolutionDir)packages\pre-release</PackageOutputPath>
-    <VersionPrefix>4.1.0</VersionPrefix>
+    <VersionPrefix>4.1.2</VersionPrefix>
     <PackageVersionSuffix>beta</PackageVersionSuffix>
     <PackageVersion>$(VersionPrefix)-$(PackageVersionSuffix)</PackageVersion>
     <DebugType>portable</DebugType>
@@ -11,7 +11,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PackageOutputPath>$(SolutionDir)packages\release</PackageOutputPath>
-    <VersionPrefix>4.1.0</VersionPrefix>
+    <VersionPrefix>4.1.2</VersionPrefix>
     <PackageVersion>$(VersionPrefix)</PackageVersion>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -71,10 +71,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.14" />
-    <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.15" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.16" />
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.16" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
     <PackageReference Include="Microsoft.Identity.Web" Version="3.8.4" />
     <PackageReference Include="Microsoft.OData.Core" Version="8.2.3" />
     <PackageReference Include="Microsoft.OData.Edm" Version="8.2.3" />
@@ -83,16 +83,16 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Scalar.AspNetCore" Version="2.1.15" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
-    <PackageReference Include="System.Text.Json" Version="9.0.4" />
+    <PackageReference Include="System.Text.Json" Version="9.0.5" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="4.1.0-beta" />
+    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="4.1.2-beta" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="4.1.0" />
+    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="4.1.2" />
   </ItemGroup>
   <ItemGroup>
     <None Update="LICENSE.txt">
