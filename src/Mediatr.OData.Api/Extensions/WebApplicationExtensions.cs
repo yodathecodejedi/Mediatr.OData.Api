@@ -38,7 +38,7 @@ public static class WebApplicationExtensions
             {
                 options.WithClientButton(true)
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                .WithDownloadButton(true)
+                .WithDocumentDownloadType(DocumentDownloadType.Both)
                 .WithTitle($"Graph Explorer | {configuration.Title}");
                 options.ShowSidebar = true;
             }).RequireAuthorization();
@@ -49,7 +49,7 @@ public static class WebApplicationExtensions
             {
                 options.WithClientButton(true)
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                .WithDownloadButton(true)
+                .WithDocumentDownloadType(DocumentDownloadType.Both)
                 .WithTitle($"Graph Explorer | {configuration.Title}");
                 options.ShowSidebar = true;
             });
