@@ -18,6 +18,8 @@ public static class WebApplicationExtensions
 
         var configuration = AppContext.GetData("ODataConfiguration") as ODataConfiguration ?? new ODataConfiguration();
 
+        app.AddMetadataRoute(configuration);
+
         // Configure the HTTP request pipeline.
         // This is our OData
         app.UseSwagger(options =>

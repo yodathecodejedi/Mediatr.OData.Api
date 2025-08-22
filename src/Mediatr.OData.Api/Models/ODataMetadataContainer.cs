@@ -113,6 +113,13 @@ public class ODataMetadataContainer(string routePrefix)
         _edmModel.MarkAsImmutable();
     }
 
+    internal void RegisterEdmModel(IServiceCollection services)
+    {
+        if (_edmModel is null)
+            throw new InvalidOperationException("Edm model not build yet");
+        services.AddSingleton<IEdmModel>(_edmModel);
+    }
+
     internal void RegisterRoutingServices(IServiceCollection services)
     {
         var allServiceDescriptors = _endpointMetadata.Values.Select(emd => emd.ServiceDescriptor);
