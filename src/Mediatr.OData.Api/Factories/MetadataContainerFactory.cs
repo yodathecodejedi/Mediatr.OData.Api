@@ -34,7 +34,7 @@ public class MetadataContainerFactory
             container.BuildEdmModel();
 
             container.RegisterRoutingServices(services);
-
+            container.RegisterEdmModel(services);
             yield return container;
         }
     }
