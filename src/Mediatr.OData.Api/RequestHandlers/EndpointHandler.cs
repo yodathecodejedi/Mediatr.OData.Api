@@ -111,6 +111,7 @@ public sealed class EndpointHandler<TDomainObject, TKey>(ODataMetadataContainer 
     public Task MapRoutes(WebApplication webApplication)
     {
 
+
         //We don't need to use the route since it is part of the Group
         var entityGroup = container.CreateOrGetEndpointGroup(webApplication, metadata);
         var route = metadata.Route;

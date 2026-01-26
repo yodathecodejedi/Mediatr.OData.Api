@@ -4,6 +4,7 @@ using Mediatr.OData.Api.Models;
 using Mediatr.OData.Api.Providers;
 using Mediatr.OData.Api.Serializers;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Formatter;
@@ -13,7 +14,11 @@ using Microsoft.AspNetCore.OData.Routing.Parser;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.ModelBuilder;
+using System.Text;
+using System.Xml;
 namespace Mediatr.OData.Api.Extensions;
 
 public static class ServiceCollectionExtensions
@@ -84,7 +89,52 @@ public static class ServiceCollectionExtensions
         {
             requestHandler.MapRoutes(app);
         }
+
+
     }
+
+    public static void AddMetadataRoute(this WebApplication app, ODataConfiguration configuration)
+    {
+        string route = SanitizeRoutePrefix(configuration.RoutePrefix);
+        //Metadata route
+        route = $"/{route}/$metadata";
+
+        //We still need to replace the routeprefix from config
+        app.MapGet(route, async (HttpContext context, IEdmModel edmModel) =>
+        {
+
+            // var edmModel = context.RequestServices.GetRequiredService<IEdmModel>();
+            if (edmModel is null)
+            {
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync("EDM Model not found.");
+                return;
+            }
+            using var sw = new StringWriter();
+            using var xw = XmlWriter.Create(sw, new XmlWriterSettings { Indent = true, Encoding = new UTF8Encoding(false) });
+
+            xw.WriteStartElement("edmx", "Edmx", "http://docs.oasis-open.org/odata/ns/edmx");
+            xw.WriteAttributeString("Version", "4.0");
+
+            xw.WriteStartElement("edmx", "DataServices", "http://docs.oasis-open.org/odata/ns/edmx");
+
+            // write the <Schema> elements
+            if (!CsdlWriter.TryWriteCsdl(edmModel, xw, CsdlTarget.OData, out var errors) && errors is not null)
+            {
+                context.Response.StatusCode = 500;
+                await context.Response.WriteAsync(string.Join("\n", errors.Select(e => e.ErrorMessage)));
+                return;
+            }
+
+            xw.WriteEndElement(); // </edmx:DataServices>
+            xw.WriteEndElement(); // </edmx:Edmx>
+            xw.Flush();
+            context.Response.StatusCode = 200;
+            context.Response.ContentType = "application/xml; charset=utf-8";
+            await context.Response.WriteAsync(sw.ToString(), Encoding.UTF8);
+        });
+    }
+
 
     private static string SanitizeRoutePrefix(string routePrefix)
     {

@@ -18,6 +18,8 @@ public static class WebApplicationExtensions
 
         var configuration = AppContext.GetData("ODataConfiguration") as ODataConfiguration ?? new ODataConfiguration();
 
+        app.AddMetadataRoute(configuration);
+
         // Configure the HTTP request pipeline.
         // This is our OData
         app.UseSwagger(options =>
@@ -36,7 +38,7 @@ public static class WebApplicationExtensions
             {
                 options.WithClientButton(true)
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                .WithDownloadButton(true)
+                .WithDocumentDownloadType(DocumentDownloadType.Both)
                 .WithTitle($"Graph Explorer | {configuration.Title}");
                 options.ShowSidebar = true;
             }).RequireAuthorization();
@@ -47,7 +49,7 @@ public static class WebApplicationExtensions
             {
                 options.WithClientButton(true)
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                .WithDownloadButton(true)
+                .WithDocumentDownloadType(DocumentDownloadType.Both)
                 .WithTitle($"Graph Explorer | {configuration.Title}");
                 options.ShowSidebar = true;
             });

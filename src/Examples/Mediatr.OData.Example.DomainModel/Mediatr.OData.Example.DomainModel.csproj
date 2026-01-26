@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="4.1.2" />
+    <ProjectReference Include="..\..\Mediatr.OData.Api.Abstractions\Mediatr.OData.Api.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>
