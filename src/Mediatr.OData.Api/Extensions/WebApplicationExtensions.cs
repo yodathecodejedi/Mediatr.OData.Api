@@ -36,7 +36,7 @@ public static class WebApplicationExtensions
         {
             app.MapScalarApiReference("", options =>
             {
-                options.WithClientButton(true)
+                options
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
                 .WithDocumentDownloadType(DocumentDownloadType.Both)
                 .WithTitle($"Graph Explorer | {configuration.Title}");
@@ -47,7 +47,7 @@ public static class WebApplicationExtensions
         {
             app.MapScalarApiReference("", options =>
             {
-                options.WithClientButton(true)
+                options
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
                 .WithDocumentDownloadType(DocumentDownloadType.Both)
                 .WithTitle($"Graph Explorer | {configuration.Title}");

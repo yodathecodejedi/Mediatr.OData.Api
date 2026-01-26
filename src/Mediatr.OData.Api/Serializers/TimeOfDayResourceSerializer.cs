@@ -17,11 +17,11 @@ public class TimeOfDayResourceSerializer : ResourceSerializer
 
         foreach (ODataPropertyInfo oDataPropertyInfo in serializerResult.Remaining)
         {
-            if (selectExpandNode.PropertyIsOfEdmKind(oDataPropertyInfo, typeof(TimeOfDay)))
+            if (selectExpandNode.PropertyIsOfEdmKind(oDataPropertyInfo, typeof(TimeOnly)))
             {
                 //Build to remove Default DateTime Values (0001-01-01 etc)
                 serializerResult.Resource.TryGetODataProperty(oDataPropertyInfo, out ODataProperty oDataProperty);
-                TimeOfDay defaultValue = default!;
+                TimeOnly defaultValue = default!;
 
                 //If we don't get a oDataProperty we can't render anything  
                 if (oDataProperty is null)
@@ -34,7 +34,7 @@ public class TimeOfDayResourceSerializer : ResourceSerializer
                     serializerResult.Remove(oDataPropertyInfo.Name);
                     continue;
                 }
-                if (oDataProperty.Value is not TimeOfDay)
+                if (oDataProperty.Value is not TimeOnly)
                 {
                     serializerResult.Remove(oDataPropertyInfo.Name);
                     continue;
@@ -45,7 +45,7 @@ public class TimeOfDayResourceSerializer : ResourceSerializer
                     continue;
                 }
 
-                TimeOfDay originalValue = (TimeOfDay)oDataProperty.Value;
+                TimeOnly originalValue = (TimeOnly)oDataProperty.Value;
 
                 try
                 {
@@ -53,7 +53,7 @@ public class TimeOfDayResourceSerializer : ResourceSerializer
 
                     if (declaredType == typeof(TimeOnly))
                     {
-                        TimeOnly newValue = new(originalValue.Hours, originalValue.Minutes, originalValue.Seconds);
+                        TimeOnly newValue = new(originalValue.Hour, originalValue.Minute, originalValue.Second);
 
                         ODataProperty property = new()
                         {
@@ -73,7 +73,7 @@ public class TimeOfDayResourceSerializer : ResourceSerializer
                 {
                     Name = oDataProperty.Name,
                     Value = new ODataPrimitiveValue(
-                            new TimeOnly(originalValue.Hours, originalValue.Minutes, originalValue.Seconds))
+                            new TimeOnly(originalValue.Hour, originalValue.Minute, originalValue.Second))
                 }
                 );
             }

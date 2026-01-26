@@ -17,11 +17,11 @@ public class DateResourceSerializer : ResourceSerializer
 
         foreach (ODataPropertyInfo oDataPropertyInfo in serializerResult.Remaining)
         {
-            if (selectExpandNode.PropertyIsOfEdmKind(oDataPropertyInfo, typeof(Date)))
+            if (selectExpandNode.PropertyIsOfEdmKind(oDataPropertyInfo, typeof(DateOnly)))
             {
                 //Build to remove Default DateTime Values (0001-01-01 etc)
                 serializerResult.Resource.TryGetODataProperty(oDataPropertyInfo, out ODataProperty oDataProperty);
-                Date defaultValue = default!;
+                DateOnly defaultValue = default!;
                 //If we don't get a oDataProperty we can't render anything  
                 if (oDataProperty is null)
                 {
@@ -33,7 +33,7 @@ public class DateResourceSerializer : ResourceSerializer
                     serializerResult.Remove(oDataPropertyInfo.Name);
                     continue;
                 }
-                if (oDataProperty.Value is not Date)
+                if (oDataProperty.Value is not DateOnly)
                 {
                     serializerResult.Remove(oDataPropertyInfo.Name);
                     continue;
