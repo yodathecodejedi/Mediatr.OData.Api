@@ -117,9 +117,9 @@ public static class ServiceCollectionExtensions
             xw.WriteAttributeString("Version", "4.0");
 
             xw.WriteStartElement("edmx", "DataServices", "http://docs.oasis-open.org/odata/ns/edmx");
-
+            
             // write the <Schema> elements
-            if (!CsdlWriter.TryWriteCsdl(edmModel, xw, CsdlTarget.OData, out var errors) && errors is not null)
+            if (!CsdlWriter.TryWriteCsdl(edmModel, xw, out var errors) && errors is not null)
             {
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsync(string.Join("\n", errors.Select(e => e.ErrorMessage)));

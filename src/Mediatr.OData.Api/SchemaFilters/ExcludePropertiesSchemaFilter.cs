@@ -1,5 +1,5 @@
 ﻿using Mediatr.OData.Api.Abstractions.Attributes;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
@@ -7,7 +7,7 @@ namespace Mediatr.OData.Api.SchemaFilters;
 
 public class ExcludePropertiesSchemaFilter : ISchemaFilter
 {
-    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
     {
         //Exclude properties that are not relevant for the OData API Model
         List<string> excludedProperties = [.. context.Type.GetProperties()
@@ -21,24 +21,26 @@ public class ExcludePropertiesSchemaFilter : ISchemaFilter
             )
             .Select(p => p.Name)];
 
-        List<string> propertiesToRemove = [.. schema.Properties
+        var schemaProperties = schema.Properties ?? new Dictionary<string, IOpenApiSchema>();
+
+        List<string> propertiesToRemove = [.. schemaProperties
             .Where(p => excludedProperties.Contains(p.Key, StringComparer.OrdinalIgnoreCase))
             .Select(p => p.Key)];
 
         foreach (var prop in propertiesToRemove)
         {
 
-            schema.Properties.Remove(prop);
+            schema.Properties?.Remove(prop);
         }
 
-        propertiesToRemove = [.. schema.Properties
+        propertiesToRemove = [.. schemaProperties
             .Where(prop => prop.Key.StartsWith("@odata", StringComparison.OrdinalIgnoreCase))
             .Select(prop => prop.Key)];
 
         //Remove Odata Properties
         foreach (var prop in propertiesToRemove)
         {
-            schema.Properties.Remove(prop);
+            schema.Properties?.Remove(prop);
         }
     }
 }

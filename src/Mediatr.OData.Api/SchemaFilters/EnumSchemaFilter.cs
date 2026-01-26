@@ -1,21 +1,27 @@
-﻿using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Text.Json.Nodes;
 
 namespace Mediatr.OData.Api.SchemaFilters;
 
 public class EnumSchemaFilter : ISchemaFilter
 {
-    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
     {
-        if (context.Type.IsEnum)
+        if (!context.Type.IsEnum)
+            return;
+        
+        if (schema is OpenApiSchema concrete)
         {
-            schema.Enum.Clear();
+            if (concrete.Enum is null)
+                concrete.Enum = [];
+            else 
+                concrete.Enum.Clear();
             foreach (var value in Enum.GetNames(context.Type))
             {
-                schema.Enum.Add(new OpenApiString(value));
+                concrete.Enum.Add(JsonValue.Create(value));
             }
-            schema.Type = "string";
+            concrete.Type = JsonSchemaType.String;
         }
     }
 }
