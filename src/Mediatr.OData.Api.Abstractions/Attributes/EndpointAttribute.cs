@@ -136,3 +136,40 @@ public sealed class EndpointAttribute<TDomainObject, Tkey, TNavigationObject> : 
         KeyInRoute = true;
     }
 }
+
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+public sealed class EndpointAttribute<TDomainObject, Tkey, TNavigationObject, TNavigationKey> : EndpointAttribute
+    where TDomainObject : class, IDomainObject<Tkey>
+    where Tkey : notnull
+    where TNavigationObject : class, IDomainObject<TNavigationKey>
+    where TNavigationKey : notnull
+{
+    public Type DomainObjectType => typeof(TDomainObject);
+    public Type KeyType => typeof(Tkey);
+    public Type NavigationObjectType => typeof(TNavigationObject);
+    public Type NavigationKeyType => typeof(TNavigationKey);
+
+    public EndpointAttribute(EndpointMethod httpMethod) : base(httpMethod)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+        KeyInRoute = true;
+    }
+
+    public EndpointAttribute(string route, EndpointMethod httpMethod) : base(route, httpMethod)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+        KeyInRoute = true;
+    }
+
+    public EndpointAttribute(EndpointMethod httpMethod, string routePrefix) : base(httpMethod, routePrefix)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+        KeyInRoute = true;
+    }
+
+    public EndpointAttribute(string route, EndpointMethod httpMethod, string routePrefix) : base(route, httpMethod, routePrefix)
+    {
+        Binding = EndpointBinding.DomainObjectBinding;
+        KeyInRoute = true;
+    }
+}

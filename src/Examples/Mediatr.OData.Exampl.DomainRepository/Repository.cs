@@ -2,6 +2,8 @@
 using Mediatr.OData.Example.DomainModel.Company;
 using Mediatr.OData.Example.DomainRepository.Interfaces;
 using Mediatr.OData.Example.DomainRepository.Queries;
+using Microsoft.AspNetCore.Connections.Features;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using System.Data;
 
 
@@ -92,6 +94,16 @@ public class Repository(IDbConnection connection) : IRepository, IDisposable
 
         TryCloseConnection();
         return members;
+    }
+
+    public async Task<IQueryable<Employee>> EmployeesAsync(Guid key = default, bool employeeOnly = false)
+    {
+        if (!TryOpenConnection())
+            return Enumerable.Empty<Employee>().AsQueryable();
+
+        var employees = await EmployeeQueries.PopulateEmployees(connection, key);
+        TryCloseConnection();
+        return employees;
     }
     //public async Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false)
     //{

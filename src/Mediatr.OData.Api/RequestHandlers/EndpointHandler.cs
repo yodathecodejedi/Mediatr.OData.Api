@@ -305,3 +305,79 @@ public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject>(ODat
         return Task.CompletedTask;
     }
 }
+
+public sealed class EndpointHandler<TDomainObject, TKey, TNavigationObject, TNavigationKey>(ODataMetadataContainer container
+        , EndpointMetadata metadata) : IHttpRequestHandler
+    where TDomainObject : class, IDomainObject
+    where TKey : notnull
+    where TNavigationObject : class, IDomainObject
+    where TNavigationKey : notnull
+{
+    public Task MapRoutes(WebApplication webApplication)
+    {
+
+        //We don't need to use the route since it is part of the Group
+        var entityGroup = container.CreateOrGetEndpointGroup(webApplication, metadata);
+        var route = metadata.Route;
+        var routeSegment = metadata.RouteSegment;
+        //For navigation we need to have a routeSegment that fits the navigation
+        ArgumentNullException.ThrowIfNull(routeSegment, nameof(routeSegment));
+
+        route = string.Concat("/{key}/", routeSegment, "/{navigationKey}");
+
+        RouteHandlerBuilder? routeHandlerBuilder = null;
+        if (metadata.HttpMethod == EndpointMethod.Get)
+        {
+            routeHandlerBuilder = entityGroup.MapGet(route, async (HttpContext httpContext
+                   , [FromServices] IEndpointGetByNavigationKeyHandler<TDomainObject, TKey, TNavigationObject, TNavigationKey> handler
+                   , [FromQuery] int? PageSize
+                   , TKey key
+                   , TNavigationKey navigationKey
+                   , CancellationToken cancellationToken) =>
+            {
+                var feature = httpContext.AddODataFeature();
+                var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TNavigationObject), feature.Path);
+                var odataQueryOptions = new ODataQueryOptionsWithPageSize<TNavigationObject>(odataQueryContext, httpContext.Request);
+
+                var result = await handler.Handle(key, typeof(TDomainObject), navigationKey, odataQueryOptions, cancellationToken);
+
+                return result.ToODataResults();
+            })
+            .ApplyIf(metadata.Produces == Produces.Object, rhb => rhb.Produces<TNavigationObject>())
+            .ApplyIf(metadata.Produces == Produces.IEnumerable, rhb => rhb.Produces<IEnumerable<TNavigationObject>>())
+            .ApplyIf(metadata.Produces == Produces.Value, rhb => rhb.Produces<int>());
+
+            //Add /$count if the produces is IEnumerable
+            if (metadata.Produces == Produces.IEnumerable)
+            {
+                //Special route for /$count
+                var routeCount = route.EndsWith('/') ? $"{route}$count" : $"{route}/$count";
+                routeHandlerBuilder = entityGroup.MapGet(routeCount, async (HttpContext httpContext
+                   , [FromServices] IEndpointGetByNavigationKeyHandler<TDomainObject, TKey, TNavigationObject, TNavigationKey> handler
+                   , [FromQuery] int? PageSize
+                   , TKey key
+                   , TNavigationKey navigationKey
+                   , CancellationToken cancellationToken) =>
+                {
+                    var feature = httpContext.AddODataFeature();
+                    var odataQueryContext = new ODataQueryContext(feature.Model, typeof(TNavigationObject), feature.Path);
+                    var odataQueryOptions = new ODataQueryOptionsWithPageSize<TNavigationObject>(odataQueryContext, httpContext.Request);
+
+                    var result = await handler.Handle(key, typeof(TDomainObject), navigationKey, odataQueryOptions, cancellationToken);
+
+                    return result.ToODataResults();
+                })
+                .Produces<int>();
+            }
+        }
+
+        if (routeHandlerBuilder is null)
+            throw new InvalidOperationException($"No request handler found for method {metadata.ServiceDescriptor}");
+
+        if (metadata.AuthorizeData is not null)
+        {
+            routeHandlerBuilder = routeHandlerBuilder.RequireAuthorization(metadata.AuthorizeData);
+        }
+        return Task.CompletedTask;
+    }
+}

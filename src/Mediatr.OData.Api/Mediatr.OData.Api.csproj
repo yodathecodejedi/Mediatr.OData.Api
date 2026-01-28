@@ -2,7 +2,7 @@
   <!-- Here we set our Assyembly and NugetPackage Version -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <PackageOutputPath>$(SolutionDir)packages\pre-release</PackageOutputPath>
-    <VersionPrefix>10.0.1</VersionPrefix>
+    <VersionPrefix>10.1.0</VersionPrefix>
     <PackageVersionSuffix>beta</PackageVersionSuffix>
     <PackageVersion>$(VersionPrefix)-$(PackageVersionSuffix)</PackageVersion>
     <DebugType>portable</DebugType>
@@ -11,7 +11,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PackageOutputPath>$(SolutionDir)packages\release</PackageOutputPath>
-    <VersionPrefix>10.0.1</VersionPrefix>
+    <VersionPrefix>10.1.0</VersionPrefix>
     <PackageVersion>$(VersionPrefix)</PackageVersion>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -83,14 +83,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Scalar.AspNetCore" Version="2.12.17" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.12.20" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
   </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.0.1-beta" />
+ <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.1.0-beta" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.0.1" />
+    <PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.1.0" />
   </ItemGroup>
   <ItemGroup>
     <None Update="LICENSE.txt">

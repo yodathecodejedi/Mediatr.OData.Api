@@ -137,4 +137,23 @@ public static class EndpointAttributeExtensions
             return false;
         }
     }
+
+    public static bool TryGetNavigationKeyType(this EndpointAttribute endpointAttribute, out Type navigationKeyType)
+    {
+        navigationKeyType = default!;
+        ArgumentNullException.ThrowIfNull(endpointAttribute);
+        try
+        {
+            if (endpointAttribute.GetPropertyValue("NavigationKeyType") is not Type propertyValue)
+            {
+                return false;
+            }
+            navigationKeyType = propertyValue as Type;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

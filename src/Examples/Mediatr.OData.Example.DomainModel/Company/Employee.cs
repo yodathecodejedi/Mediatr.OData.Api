@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Mediatr.OData.Example.DomainModel.Company
 {
-    public sealed class Employee : IDomainObject<int>
+    public sealed class Employee : IDomainObject<Guid>
     {
         //Keys
         [ODataIgnore]

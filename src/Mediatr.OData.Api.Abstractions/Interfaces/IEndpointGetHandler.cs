@@ -23,3 +23,13 @@ public interface IEndpointGetByNavigationHandler<TDomainObject, TKey, TNavigatio
     Task<IMediatrResult<dynamic>> Handle(TKey key, Type TDomainObject, IODataQueryOptionsWithPageSize<TNavigationObject> options
         , CancellationToken cancellationToken);
 }
+
+public interface IEndpointGetByNavigationKeyHandler<TDomainObject, TKey, TNavigationObject, TNavigationKey>
+    where TDomainObject : class, IDomainObject
+    where TKey : notnull
+    where TNavigationObject : class, IDomainObject
+    where TNavigationKey : notnull
+{
+    Task<IMediatrResult<dynamic>> Handle(TKey key, Type TDomainObject, TNavigationKey navigationKey, IODataQueryOptionsWithPageSize<TNavigationObject> options
+        , CancellationToken cancellationToken);
+}

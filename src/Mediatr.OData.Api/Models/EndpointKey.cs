@@ -10,5 +10,5 @@ internal record EndpointKey
     public required bool KeyInRoute { set; get; } = false;
     public required Type KeyType { set; get; } = default!;
     public required Type ObjectType { set; get; } = default!;
-
+    public required Type NavigationKeyType { set; get; } = default!;
 }

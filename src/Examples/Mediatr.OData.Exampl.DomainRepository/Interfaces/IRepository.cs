@@ -18,7 +18,7 @@ public interface IRepository
 
     public Task<IQueryable<IDomainObject>> DepartmentMembersAsync(Guid key = default!);
 
-    //public Task<IQueryable<Employee>> EmployeesAsync(int Id = default!, bool employeeOnly = false);
+    public Task<IQueryable<Employee>> EmployeesAsync(Guid key = default!, bool employeeOnly = false);
 
     //public Task<IQueryable<Company>> CompaniesAsync(int Id = default!, bool companyOnly = false);
 }

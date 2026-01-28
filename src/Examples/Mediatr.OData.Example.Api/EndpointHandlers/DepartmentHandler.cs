@@ -126,5 +126,16 @@ namespace Mediatr.OData.Example.Api.EndpointHandlers
                 return options.ApplyODataOptions(result.ToDomainObjects());
             }
         }
+
+        [Endpoint<Department, Guid, Employee, Guid>(EndpointMethod.Get)]
+        public class GetDepartmentEmployeeByKey(IRepository repository) : IEndpointGetByNavigationKeyHandler<Department, Guid, Employee, Guid>
+        {
+            public async Task<IMediatrResult<dynamic>> Handle(Guid key, Type TDomainObject, Guid navigationKey, IODataQueryOptionsWithPageSize<Employee> options, CancellationToken cancellationToken)
+            {
+                var result = await repository.EmployeesAsync(navigationKey);
+
+                return options.ApplyODataOptions(result);
+            }
+        }
     }
 }

@@ -65,7 +65,8 @@ public class ODataMetadataContainer(string routePrefix)
             RouteSegment = endpointMetaData.RouteSegment,
             KeyType = endpointMetaData.KeyType,
             KeyInRoute = endpointMetaData.KeyInRoute,
-            ObjectType = endpointMetaData.DomainObjectType
+            ObjectType = endpointMetaData.DomainObjectType,
+            NavigationKeyType = endpointMetaData.NavigationKeyType
         };
 
         if (!_endpointMetadata.TryGetValue(endpointKey, out EndpointMetadata? configuredMetadata))
@@ -134,6 +135,7 @@ public class ODataMetadataContainer(string routePrefix)
             var KeyType = metadata.KeyType;
             var domainObjectType = metadata.DomainObjectType;
             var navigationObjectType = metadata.NavigationObjectType;
+            var navigationKeyType = metadata.NavigationKeyType;
 
             if (domainObjectType is not null && KeyType is null && navigationObjectType is null)
             {
@@ -147,9 +149,15 @@ public class ODataMetadataContainer(string routePrefix)
                 services.AddSingleton(requestHandlerType, s
                     => ActivatorUtilities.CreateInstance(s, endpointHandlerType, this, metadata));
             }
-            if (domainObjectType is not null && KeyType is not null && navigationObjectType is not null)
+            if (domainObjectType is not null && KeyType is not null && navigationObjectType is not null && navigationKeyType is null)
             {
                 var endpointHandlerType = typeof(EndpointHandler<,,>).MakeGenericType(metadata.DomainObjectType, metadata.KeyType, metadata.NavigationObjectType);
+                services.AddSingleton(requestHandlerType, s
+                    => ActivatorUtilities.CreateInstance(s, endpointHandlerType, this, metadata));
+            }
+            if (domainObjectType is not null && KeyType is not null && navigationObjectType is not null && navigationKeyType is not null)
+            {
+                var endpointHandlerType = typeof(EndpointHandler<,,,>).MakeGenericType(metadata.DomainObjectType, metadata.KeyType, metadata.NavigationObjectType, metadata.NavigationKeyType);
                 services.AddSingleton(requestHandlerType, s
                     => ActivatorUtilities.CreateInstance(s, endpointHandlerType, this, metadata));
             }

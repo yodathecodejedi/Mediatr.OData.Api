@@ -13,6 +13,8 @@ public class EndpointMetadata
     public required Type DomainObjectType { set; get; } = default!;
     public required Type KeyType { set; get; } = default!;
     public required Type NavigationObjectType { set; get; } = default!;
+    public required Type NavigationKeyType { set; get; } = default!;
+
     public required string Route { set; get; } = string.Empty;
     public required string RouteSegment { set; get; } = string.Empty;
     public required EndpointMethod HttpMethod { set; get; } = EndpointMethod.Get;
@@ -30,8 +32,10 @@ public class EndpointMetadata
         endpointAttribute.TryGetRoute(out var route);
         //Determin the DomainObject
         endpointAttribute.TryGetDomainObjectType(out var domainObjectType);
-        //Detarmin the NavigationObject if it is defined
+        //Determin the NavigationObject if it is defined
         endpointAttribute.TryGetNavigationObjectType(out var navigationObjectType);
+        //Determin the NavigationKeyType if it is defined
+        endpointAttribute.TryGetNavigationKeyType(out var navigationKeyType);
         //Determin the HttpMethod
         endpointAttribute.TryGetHttpMethod(out var httpMethod);
         //Check if the key is in the route
@@ -46,7 +50,7 @@ public class EndpointMetadata
         domainObjectType.TryGetProduces(navigationObjectType, keyInRoute, httpMethod, out var produces);
 
         //Get the implementation Interface
-        var implementationInterface = TryGetImplementationInterface(httpMethod, keyType, navigationObjectType);
+        var implementationInterface = TryGetImplementationInterface(httpMethod, keyType, navigationObjectType, navigationKeyType);
         //Determin the autorization
         var endpointAuthorizeAttribute = targetType.GetCustomAttribute<ODataAuthorizeAttribute>() ?? default!;
         var domainObjectAuthorizeAttribute = domainObjectType.GetCustomAttribute<ODataAuthorizeAttribute>() ?? default!;
@@ -55,7 +59,7 @@ public class EndpointMetadata
         if (string.IsNullOrEmpty(route) && string.IsNullOrEmpty(groupRoute))
             throw new MissingMemberException($"The endpoint route/grouping is not declared in {targetType.FullName} or its parent. Please use EndpointAttribute on {targetType.FullName} or EndpointGroupAttribute on its parent.");
 
-        var serviceType = TryGetServiceType(httpMethod, domainObjectType, keyType, navigationObjectType);
+        var serviceType = TryGetServiceType(httpMethod, domainObjectType, keyType, navigationObjectType, navigationKeyType);
         if (serviceType == default!)
             throw new MissingMemberException($"The serviceType for {domainObjectType?.Name} and httpMethod {httpMethod} is not found, your endpointhandler is malformatted.");
         var serviceDescriptor = new ServiceDescriptor(serviceType, targetType, ServiceLifetime.Transient) ?? default!;
@@ -71,13 +75,14 @@ public class EndpointMetadata
             KeyType = keyType,
             Produces = produces,
             NavigationObjectType = navigationObjectType ?? default!,
+            NavigationKeyType = navigationKeyType ?? default!,
             Route = string.IsNullOrEmpty(route) ? groupRoute : route,
             RouteSegment = routeSegment,
             ServiceDescriptor = serviceDescriptor
         } ?? default!;
     }
 
-    private static Type TryGetServiceType(EndpointMethod httpMethod, Type? domainObjectType, Type keyType, Type? navigationObjectType)
+    private static Type TryGetServiceType(EndpointMethod httpMethod, Type? domainObjectType, Type keyType, Type? navigationObjectType, Type? navigationKeyType)
     {
         if (httpMethod == EndpointMethod.Delete && keyType is not null && domainObjectType is not null && navigationObjectType is null)
         {
@@ -94,9 +99,13 @@ public class EndpointMetadata
             return typeof(IEndpointGetByKeyHandler<,>).MakeGenericType(domainObjectType, keyType);
         }
 
-        if (httpMethod == EndpointMethod.Get && keyType is not null && domainObjectType is not null && navigationObjectType is not null)
+        if (httpMethod == EndpointMethod.Get && keyType is not null && domainObjectType is not null && navigationObjectType is not null && navigationKeyType is null)
         {
             return typeof(IEndpointGetByNavigationHandler<,,>).MakeGenericType(domainObjectType, keyType, navigationObjectType);
+        }
+        if (httpMethod == EndpointMethod.Get && keyType is not null && domainObjectType is not null && navigationObjectType is not null && navigationKeyType is not null)
+        {
+            return typeof(IEndpointGetByNavigationKeyHandler<,,,>).MakeGenericType(domainObjectType, keyType, navigationObjectType, navigationKeyType);
         }
 
         if (httpMethod == EndpointMethod.Patch && keyType is not null && domainObjectType is not null && navigationObjectType is null)
@@ -116,7 +125,7 @@ public class EndpointMetadata
         return default!;
     }
 
-    private static Type TryGetImplementationInterface(EndpointMethod method, Type TypeKey, Type NavigationDomainObject)
+    private static Type TryGetImplementationInterface(EndpointMethod method, Type TypeKey, Type NavigationDomainObject, Type navigationKeyType)
     {
         if (method == EndpointMethod.Delete && TypeKey is not null && NavigationDomainObject is null)
         {
@@ -130,9 +139,13 @@ public class EndpointMetadata
         {
             return typeof(IEndpointGetByKeyHandler<,>);
         }
-        if (method == EndpointMethod.Get && TypeKey is not null && NavigationDomainObject is not null)
+        if (method == EndpointMethod.Get && TypeKey is not null && NavigationDomainObject is not null && navigationKeyType is null)
         {
             return typeof(IEndpointGetByNavigationHandler<,,>);
+        }
+        if (method == EndpointMethod.Get && TypeKey is not null && NavigationDomainObject is not null && navigationKeyType is not null)
+        {
+            return typeof(IEndpointGetByNavigationKeyHandler<,,,>);
         }
         if (method == EndpointMethod.Patch && TypeKey is not null && NavigationDomainObject is null)
         {

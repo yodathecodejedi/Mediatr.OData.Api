@@ -5,14 +5,19 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
-		<PackageReference Include="Mediatr.OData.Api" Version="10.0.1-beta" />
-	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<PackageReference Include="Mediatr.OData.Api" Version="10.0.1" />
 	</ItemGroup>
 	<ItemGroup>
+	  <PackageReference Include="Mediatr.OData.Api" Version="10.1.0" />
+	</ItemGroup>
+	<ItemGroup>
 	  <ProjectReference Include="..\Mediatr.OData.Exampl.DomainRepository\Mediatr.OData.Example.DomainRepository.csproj" />
 	</ItemGroup>
-
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<PackageReference Include="Mediatr.OData.Api" Version="10.1.0-beta" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<PackageReference Include="Mediatr.OData.Api" Version="10.1.0" />
+	</ItemGroup>
 </Project>

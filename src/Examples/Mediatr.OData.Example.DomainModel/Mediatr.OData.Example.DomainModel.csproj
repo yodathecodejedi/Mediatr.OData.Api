@@ -6,10 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-	<PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.0.1-beta" />
+	<PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.1.0-beta" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-	<PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.0.1" />
+	<PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.1.0" />
   </ItemGroup>
 
 </Project>
