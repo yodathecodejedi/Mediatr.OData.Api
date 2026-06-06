@@ -2,7 +2,7 @@
   <!-- Here we set our Assyembly and NugetPackage Version -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <PackageOutputPath>$(SolutionDir)packages\pre-release</PackageOutputPath>
-    <VersionPrefix>10.1.0</VersionPrefix>
+    <VersionPrefix>10.1.1</VersionPrefix>
     <PackageVersionSuffix>beta</PackageVersionSuffix>
     <PackageVersion>$(VersionPrefix)-$(PackageVersionSuffix)</PackageVersion>
     <DebugType>portable</DebugType>
@@ -11,7 +11,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PackageOutputPath>$(SolutionDir)packages\release</PackageOutputPath>
-    <VersionPrefix>10.1.0</VersionPrefix>
+    <VersionPrefix>10.1.1</VersionPrefix>
     <PackageVersion>$(VersionPrefix)</PackageVersion>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -71,11 +71,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="10.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="10.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="10.0.0-preview.2" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102">
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.300">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

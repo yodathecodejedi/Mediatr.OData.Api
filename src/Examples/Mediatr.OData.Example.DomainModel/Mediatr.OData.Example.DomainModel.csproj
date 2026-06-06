@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-	<PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.1.0-beta" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)' == 'Release'">
-	<PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.1.0" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.1.1-beta" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<PackageReference Include="Mediatr.OData.Api.Abstractions" Version="10.1.1" />
+	</ItemGroup>
 
 </Project>
