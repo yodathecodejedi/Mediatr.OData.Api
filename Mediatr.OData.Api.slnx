@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/pipeline/">
+    <File Path="pipeline/azure-pipelines.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="GenerateTheJediCompanyDB.sql" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+    <File Path="TODO.txt" />
+  </Folder>
+  <Project Path="src/Examples/Mediatr.OData.Exampl.DomainRepository/Mediatr.OData.Example.DomainRepository.csproj" />
+  <Project Path="src/Examples/Mediatr.OData.Example.Api/Mediatr.OData.Example.Api.csproj" />
+  <Project Path="src/Examples/Mediatr.OData.Example.DomainModel/Mediatr.OData.Example.DomainModel.csproj" />
+  <Project Path="src/Mediatr.OData.Api.Abstractions/Mediatr.OData.Api.Abstractions.csproj" />
+  <Project Path="src/Mediatr.OData.Api/Mediatr.OData.Api.csproj" />
+</Solution>
